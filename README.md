@@ -1,6 +1,7 @@
 # MinimalTerminal
 A terminal / command line presentation application
 
+ Joseph/readme-update
 ## How It Could Work
 We write slides by hand in an HTML file. The app supports only a small set of tags, so the parser stays manageable.
 Supported tags include `deck`, `slide`, `h1`, `p`, `ul`, `li`, `b`, `footer`, etc. Anything else can either notify or be ignored.
@@ -43,3 +44,6 @@ Maybe have a way to save the deck as a PDF so it can be shared as a handout.
 
 ### PowerPoint Converter
 Converts an existing `.pptx` file into a `slides.html` that follows the same schema. The file can then be presented or edited like any hand-written deck.
+
+It is a lightweight presentation tool that lets users create and deliver interactive presentations from the terminal, with support for code, images, animations, and embedded terminal execution.
+
