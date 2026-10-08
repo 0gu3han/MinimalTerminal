@@ -184,7 +184,8 @@ void print_tree(Node node, std::string prefix, bool last) {
 // ─────────────────────────────────────────────
 
 auto main(int argc, char* argv[]) -> int {
-    const char* path = argc > 1 ? argv[1] : "slides.html";
+    // For now, just expect execution from the project root
+    const char* path = argc > 1 ? argv[1] : "sample/slides.html";
 
     std::ifstream file(path);
     if (!file) {
