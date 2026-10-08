@@ -9,10 +9,26 @@
 // text  → only filled in for Text nodes
 // children → what is nested inside this node
 
+// The Style is how a Node should look on screen
+//   color -> text color name: default, red, green, blue
+//   bold/italic/underline -> on or off
+//   align -> left, center, right
+// only inherited properties flow downstream 
+// from parent to child. Alignment belongs to the block itself
+
+struct Style {
+    std::string color     = "default";
+    bool        bold      = false;
+    bool        italic    = false;
+    bool        underline = false;
+    std::string align     = "left";
+};
+
 struct Node {
     std::string       kind;
     std::string       text;
     std::vector<Node> children;
+    Style             style;      // filled in by style()
 };
 
 
@@ -110,6 +126,37 @@ Node parse(const std::string& src) {
 }
 
 // ─────────────────────────────────────────────
+// Styler: work out how each node should look.
+//
+// How it works:
+//   Walk the tree from top-down. Each node starts with a copy of its
+//   parent's style (so a <b> inside a red <p> is still red), then
+//   its own kind adds on top of that (so <b> turns bold on).
+//   Text nodes have no look of their own — they just take whatever
+//   their parent has.
+// ─────────────────────────────────────────────
+
+void style(Node& node, const Style& parent) {
+    // start from the parent's inheritable properties
+    Style s;
+    s.color     = parent.color;
+    s.bold      = parent.bold;
+    s.italic    = parent.italic;
+    s.underline = parent.underline;
+
+    // apply a node's own defaults
+    if      (node.kind == "H1") { s.bold = true; s.align = "center"; }
+    else if (node.kind == "B")  { s.bold = true; }
+    else if (node.kind == "I")  { s.italic = true; }
+
+    node.style = s;
+
+    // pass the style down to the children
+    for (Node& child : node.children)
+        style(child, s);
+}
+
+// ─────────────────────────────────────────────
 // Print the tree so we can see it in the terminal.
 // prefix + connector builds the ├─ / └─ lines.
 // ─────────────────────────────────────────────
@@ -118,6 +165,13 @@ void print_tree(Node node, std::string prefix, bool last) {
     std::cout << prefix << connector << node.kind;
     if (node.kind == "Text")
         std::cout << " \"" << node.text << "\"";
+
+    // show the style next to the node
+    std::cout << "  [" << node.style.color;
+    if (node.style.bold)      std::cout << " bold";
+    if (node.style.italic)    std::cout << " italic";
+    if (node.style.underline) std::cout << " underline";
+    std::cout << " " << node.style.align << "]";
     std::cout << "\n";
 
     std::string next_prefix = prefix + (last ? "   " : "│  ");
@@ -126,7 +180,7 @@ void print_tree(Node node, std::string prefix, bool last) {
 }
 
 // ─────────────────────────────────────────────
-// main: read the file, parse it, print the tree
+// main: read the file, parse it, style it, print the tree
 // ─────────────────────────────────────────────
 
 auto main(int argc, char* argv[]) -> int {
@@ -145,6 +199,7 @@ auto main(int argc, char* argv[]) -> int {
         src += line + "\n";
 
     Node root = parse(src);
+    style(root, Style());
 
     // print root without a connector, then its children
     std::cout << root.kind << "\n";
