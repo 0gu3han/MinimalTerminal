@@ -1,5 +1,6 @@
 module;
 #include <fstream>
+#include <iostream>
 #include <string>
 
 module presentation;
@@ -30,4 +31,24 @@ Presentation::Presentation(std::ifstream& file)
         slides.push_back(Slide(html.substr(beginningOfSlide + 9, endOfSlide - beginningOfSlide - 9)));
         beginningOfSlide = html.find("<article>", endOfSlide + 10); // 10 = length of "</article>"
     }
+}
+//show the slides one at a time and move between them based on the keys the user presses
+void Presentation::start()
+{
+    if (slides.empty())
+        return;
+//draw the current slide, then wait for a key and Enter: n = next, p = previous, q = quit
+    std::string input;
+    while (true) {
+        slides[currSlide].render();
+        if (!std::getline(std::cin, input) || input == "q")
+            break;
+
+        if (input == "n" && currSlide < static_cast<int>(slides.size()) - 1)
+            currSlide++;
+        else if (input == "p" && currSlide > 0)
+            currSlide--;
+    }
+//clear the last slide before exiting
+    std::cout << "\033[2J\033[H";
 }

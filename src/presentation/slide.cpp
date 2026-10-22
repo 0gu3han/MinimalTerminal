@@ -1,4 +1,5 @@
 module;
+#include <iostream>
 #include <string>
 
 module slide;
@@ -35,4 +36,12 @@ Slide::Slide(std::string rawHTML)
         bullets.push_back(trim(rawHTML.substr(bulletStart + 4, bulletEnd - bulletStart - 4)));
         bulletStart = rawHTML.find("<li>", bulletEnd + 5); // 5 = length of "</li>"
     }
+}
+//clear the screen and print the heading and bullet points of the slide
+void Slide::render()
+{   //clear the screen and move the cursor to the top left
+    std::cout << "\033[2J\033[H";
+    std::cout << heading << "\n\n";
+    for (const std::string& bullet : bullets)
+        std::cout << "  - " << bullet << "\n";
 }
