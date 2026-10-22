@@ -1,4 +1,7 @@
-#include "slide.hpp"
+module;
+#include <string>
+
+module slide;
 
 // remove spaces and tabs from both ends of the text
 static std::string trim(const std::string& text)

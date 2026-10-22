@@ -1,4 +1,8 @@
-#include "presentation.hpp"
+module;
+#include <fstream>
+#include <string>
+
+module presentation;
 
 Presentation::Presentation(std::ifstream& file)
 {

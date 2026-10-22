@@ -1,9 +1,12 @@
-#include "slide.hpp"
+module;
 #include <fstream>
 #include <string>
 #include <vector>
 
-class Presentation
+export module presentation;
+import slide;
+
+export class Presentation
 {
 public:
     /// @param file The open presentation file

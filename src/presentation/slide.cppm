@@ -1,7 +1,10 @@
+module;
 #include <string>
 #include <vector>
 
-class Slide
+export module slide;
+
+export class Slide
 {
 public:
     /// @brief 
