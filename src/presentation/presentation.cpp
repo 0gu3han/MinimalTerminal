@@ -1,50 +1,54 @@
-#include "presentation.hpp"
-
+module;
+#include <fstream>
+#include <iostream>
 #include <string>
 
-namespace {
-std::vector<std::string> extract_tag_blocks(const std::string& html, const std::string& tag)
+module presentation;
+
+Presentation::Presentation(std::ifstream& file)
 {
-	std::vector<std::string> blocks;
+    currSlide = 0;
 
-	const std::string open_tag = "<" + tag + ">";
-	const std::string close_tag = "</" + tag + ">";
+    std::string html;
+    std::string line;
+    //turn the file into a single string
+    while (std::getline(file, line))
+        html += line + "\n";
 
-	std::size_t cursor = 0;
-	while (true) {
-		const auto open_pos = html.find(open_tag, cursor);
-		if (open_pos == std::string::npos) {
-			break;
-		}
+    //find the beginning of the presentation, and the end of the presentation
+    size_t presentationStart = html.find("<main>");
+    size_t presentationEnd = html.find("</main>");
+    if (presentationStart == std::string::npos || presentationEnd == std::string::npos)
+        return;
+    //after finding the start of the presentation, find each slide and add it to the slides vector
+    size_t beginningOfSlide = html.find("<article>", presentationStart);
+    while (beginningOfSlide != std::string::npos && beginningOfSlide < presentationEnd) {
+        size_t endOfSlide = html.find("</article>", beginningOfSlide + 9); // 9 = length of "<article>"
+        if (endOfSlide == std::string::npos)
+            break;
 
-		const auto content_start = open_pos + open_tag.size();
-		const auto close_pos = html.find(close_tag, content_start);
-		if (close_pos == std::string::npos) {
-			break;
-		}
-
-		blocks.push_back(html.substr(content_start, close_pos - content_start));
-		cursor = close_pos + close_tag.size();
-	}
-
-	return blocks;
+    //extract the content between <article> and </article> and pass it to the Slide constructor, then add the resulting Slide instance to the slides vector
+        slides.push_back(Slide(html.substr(beginningOfSlide + 9, endOfSlide - beginningOfSlide - 9)));
+        beginningOfSlide = html.find("<article>", endOfSlide + 10); // 10 = length of "</article>"
+    }
 }
-} // namespace
-
-Presentation::Presentation(std::string rawHTML)
-	: currSlide(0)
-{
-	auto slide_blocks = extract_tag_blocks(rawHTML, "article");
-
-	for (const auto& slide_html : slide_blocks) {
-		slides.emplace_back(slide_html);
-	}
-
-	if (slides.empty()) {
-		currSlide = -1;
-	}
-}
-
+//show the slides one at a time and move between them based on the keys the user presses
 void Presentation::start()
 {
+    if (slides.empty())
+        return;
+//draw the current slide, then wait for a key and Enter: n = next, p = previous, q = quit
+    std::string input;
+    while (true) {
+        slides[currSlide].render();
+        if (!std::getline(std::cin, input) || input == "q")
+            break;
+
+        if (input == "n" && currSlide < static_cast<int>(slides.size()) - 1)
+            currSlide++;
+        else if (input == "p" && currSlide > 0)
+            currSlide--;
+    }
+//clear the last slide before exiting
+    std::cout << "\033[2J\033[H";
 }

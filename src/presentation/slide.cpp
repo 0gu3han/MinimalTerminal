@@ -1,128 +1,47 @@
-#include "slide.hpp"
-
-#include <cctype>
+module;
 #include <iostream>
 #include <string>
 
-namespace {
-std::string trim(const std::string& text)
+module slide;
+
+// remove spaces and tabs from both ends of the text
+static std::string trim(const std::string& text)
 {
-    const auto first_pos = text.find_first_not_of(" \t\n\r");
-    if (first_pos == std::string::npos) {
+    size_t first = text.find_first_not_of(" \t");
+    if (first == std::string::npos) // empty or all whitespace
         return "";
-    }
 
-    const auto last_pos = text.find_last_not_of(" \t\n\r");
-    return text.substr(first_pos, last_pos - first_pos + 1);
+    size_t last = text.find_last_not_of(" \t");
+    return text.substr(first, last - first + 1);
 }
-
-std::string strip_tags(const std::string& html)
-{
-    std::string out;
-    out.reserve(html.size());
-
-    // HTML stripping for supported inline tags.
-    bool in_tag = false;
-    for (const char ch : html) {
-        if (ch == '<') {
-            in_tag = true;
-            continue;
-        }
-
-        if (ch == '>') {
-            in_tag = false;
-            continue;
-        }
-
-        if (!in_tag) {
-            out.push_back(ch);
-        }
-    }
-
-    return trim(out);
-}
-
-std::string extract_first_tag_content(const std::string& html, const std::string& tag)
-{
-    const std::string open_tag = "<" + tag + ">";
-    const std::string close_tag = "</" + tag + ">";
-
-    const auto open_pos = html.find(open_tag);
-    if (open_pos == std::string::npos) {
-        return "";
-    }
-
-    const auto content_start = open_pos + open_tag.size();
-    const auto close_pos = html.find(close_tag, content_start);
-    if (close_pos == std::string::npos) {
-        return "";
-    }
-
-    return strip_tags(html.substr(content_start, close_pos - content_start));
-}
-
-std::vector<std::string> extract_all_tag_contents(const std::string& html, const std::string& tag)
-{
-    std::vector<std::string> values;
-
-    const std::string open_tag = "<" + tag + ">";
-    const std::string close_tag = "</" + tag + ">";
-
-    std::size_t cursor = 0;
-    while (true) {
-        // Walk forward one tag-pair at a time and collect non-empty bodies.
-        const auto open_pos = html.find(open_tag, cursor);
-        if (open_pos == std::string::npos) {
-            break;
-        }
-
-        const auto content_start = open_pos + open_tag.size();
-        const auto close_pos = html.find(close_tag, content_start);
-        if (close_pos == std::string::npos) {
-            break;
-        }
-
-        const std::string content = strip_tags(html.substr(content_start, close_pos - content_start));
-        if (!content.empty()) {
-            values.push_back(content);
-        }
-
-        cursor = close_pos + close_tag.size();
-    }
-
-    return values;
-}
-} // namespace
-
+//extract the heading and bullet points from the raw HTML of the slide's <article> element
 Slide::Slide(std::string rawHTML)
-{
-    // Parse a simple schema: heading from h1, body from li (or p as fallback).
-    heading = extract_first_tag_content(rawHTML, "h1");
-    bullets = extract_all_tag_contents(rawHTML, "li");
+{   //get the title of the slide
+    size_t titleStart = rawHTML.find("<h1>");
+    size_t titleEnd = rawHTML.find("</h1>");
+    if (titleStart != std::string::npos && titleEnd != std::string::npos)
+        heading = trim(rawHTML.substr(titleStart + 4, titleEnd - titleStart - 4)); // 4 = length of "<h1>"
+//get the bullet points together
+    size_t firstBullet = rawHTML.find("<ul>");
+    size_t lastBullet = rawHTML.find("</ul>");
+    if (firstBullet == std::string::npos || lastBullet == std::string::npos)
+        return;
+//get each individual bullet point and add it to the bullets vector
+    size_t bulletStart = rawHTML.find("<li>", firstBullet);
+    while (bulletStart != std::string::npos && bulletStart < lastBullet) {
+        size_t bulletEnd = rawHTML.find("</li>", bulletStart + 4); // 4 = length of "<li>"
+        if (bulletEnd == std::string::npos)
+            break;
 
-    // Fallback for early demo slides that use paragraphs instead of bullet lists.
-    if (bullets.empty()) {
-        bullets = extract_all_tag_contents(rawHTML, "p");
+        bullets.push_back(trim(rawHTML.substr(bulletStart + 4, bulletEnd - bulletStart - 4)));
+        bulletStart = rawHTML.find("<li>", bulletEnd + 5); // 5 = length of "</li>"
     }
 }
-
+//clear the screen and print the heading and bullet points of the slide
 void Slide::render()
-{
-    // Render plain terminal-friendly output for now.
-    if (!heading.empty()) {
-        std::cout << heading << '\n';
-    } else {
-        std::cout << "(untitled slide)\n";
-    }
-
-    std::cout << '\n';
-
-    if (bullets.empty()) {
-        std::cout << "- (no content)\n";
-        return;
-    }
-
-    for (const auto& bullet : bullets) {
-        std::cout << "- " << bullet << '\n';
-    }
+{   //clear the screen and move the cursor to the top left
+    std::cout << "\033[2J\033[H";
+    std::cout << heading << "\n\n";
+    for (const std::string& bullet : bullets)
+        std::cout << "  - " << bullet << "\n";
 }
