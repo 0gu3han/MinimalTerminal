@@ -1,49 +1,53 @@
-# MinimalTerminal
-A terminal / command line presentation application
+# Dynodeck
+A lightweight presentation application that runs in the terminal. It targets iTerm2 on macOS.
 
- Joseph/readme-update
-## How It Could Work
-We write slides by hand in an HTML file. The app supports only a small set of tags, so the parser stays manageable.
-Supported tags include `deck`, `slide`, `h1`, `p`, `ul`, `li`, `b`, `footer`, etc. Anything else can either notify or be ignored.
+## What it does
+The presenter writes slides by hand in an HTML file and starts Dynodeck with that file. The first slide shows immediately,
+and the presenter moves between slides with the arrow keys. If the file is invalid, Dynodeck exits with an error message
+and shows nothing.
 
-### Themes (`theme.css`)
-Start with a built-in Light and Dark theme. We can create more elaborate ones depending on how much time is left.
+Slides can contain `<code>` blocks. The presenter can press a key to edit the code during the presentation, then go to
+the next slide to see the output. If the code fails to compile or run, the error is shown instead of the output. Edits
+can also be thrown away.
 
-> Terminals can't change font family or font size, but they can support:
-> - foreground and background color
-> - bold, italic, underline, dim
-> - text alignment, padding, and margins (measured in character cells)
-> Large titles can be drawn with ASCII-art lettering instead.
+The presenter can search for a word or phrase. Dynodeck lists the slides that match and jumps to the one the presenter
+picks. If nothing matches, it says so.
 
----
+When the presentation is over, the presenter can exit and optionally save it as a PDF, including any code edits and
+their output.
 
-**Parser → Styler → Layout → Renderer → Presenter**
+## Presentation format
+The `<main>` element holds the presentation and each `<article>` is one slide. See `sample/slides.html`.
 
-### 1. Parser
-Reads through the slides file and picks out the relevant tags, which each become a node. The output is a tree, not a flat list:
-a `<p>` can contain a `<b>`, and a `<ul>` contains `<li>`s.
+```html
+<main>
+    <article>
+        <h1>Hello</h1>
+        <ul>
+            <li>First point</li>
+        </ul>
+    </article>
+</main>
+```
 
-### 2. Styler
-Takes each node and works out how it should look. For example, a `<b>` inside a red `<p>` is still red.
+## Building
+Dynodeck is written in C++23 and uses C++ modules (`.cppm` files) instead of header files. Each `.cppm` file declares
+`export module <name>;`, its implementation goes in the matching `.cpp` file, and other files use `import <name>;`.
 
-### 3. Layout
-Takes the styled nodes and decides where each one goes on screen. Using the terminal's current size, it gives each node a position and
-size, handles word wrapping and alignment, and runs again when the terminal window is resized.
+The build setup is still to be determined. For now, CMake needs the Ninja generator to compile modules. Ninja is only
+used for compiling and is not part of Dynodeck itself.
 
-### 4. Renderer
-Turns the nodes into a grid of cells, then writes that grid to the terminal as ANSI escape codes,the special character sequences that set colors and 
-move the cursor. The renderer also switches the terminal into raw mode (via `termios`) so key presses can be read one at a time.
+```sh
+cmake -B build -G Ninja
+cmake --build build
+./build/dynodeck sample/slides.html
+```
 
-### 5. Presenter / Input Loop
-Waits for key presses and moves through the deck. The presenter tracks the current slide, and going back is supported.
-If slides use incremental reveals like bullet points, the presenter tracks the pair (slide, step) instead of a single slide number.
+## How it works
+Parser -> Styler -> Layout -> Renderer -> Presenter
 
-## Things to Think About
-### PDF Export
-Maybe have a way to save the deck as a PDF so it can be shared as a handout.
-
-### PowerPoint Converter
-Converts an existing `.pptx` file into a `slides.html` that follows the same schema. The file can then be presented or edited like any hand-written deck.
-
-It is a lightweight presentation tool that lets users create and deliver interactive presentations from the terminal, with support for code, images, animations, and embedded terminal execution.
-
+- Parser: reads the HTML file and builds a tree of the supported tags.
+- Styler: works out how each element should look, including styles inherited from parent elements.
+- Layout: places each element based on the terminal size, with word wrapping and alignment.
+- Renderer: draws the slide to the terminal with escape codes, in raw mode so key presses are read one at a time.
+- Presenter: tracks the current slide and handles navigation, edit mode, search, and exit.
