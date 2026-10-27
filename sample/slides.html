@@ -2,14 +2,31 @@
     <article>
         <h1>Hello</h1>
         <ul>
-            <li>First point</li>
-            <li>Second point</li>
+            <li>First point with <b>bold</b> text</li>
+            <li>Second point with <i>italic</i> and <u>underline</u></li>
         </ul>
     </article>
     <article>
         <h1>Second Slide</h1>
         <ul>
             <li>Another point</li>
+            <li><b>Bold with <i>nested italic</i> inside</b></li>
         </ul>
+    </article>
+    <article>
+        <h1 style="color: yellow">Code Blocks</h1>
+        <ul>
+            <li style="color: red">A red bullet</li>
+            <li style="color: green">A green bullet with <b>bold</b> inside</li>
+            <li>Indentation and <b>symbols</b> in code are kept exactly</li>
+        </ul>
+        <pre><code>
+#include &lt;iostream&gt;
+
+int main() {
+    std::cout &lt;&lt; "Hello, deck!\n";
+    return 0;
+}
+        </code></pre>
     </article>
 </main>

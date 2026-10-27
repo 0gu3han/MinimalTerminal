@@ -3,6 +3,7 @@ module;
 #include <vector>
 
 export module slide;
+import styler;
 
 export class Slide
 {
@@ -16,5 +17,8 @@ public:
 
 private:
     std::string heading;
+    Color headingColor = Color::Default;
     std::vector<std::string> bullets;
+    std::vector<Color> bulletColors;
+    std::vector<std::string> codeLines;
 };
