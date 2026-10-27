@@ -5,6 +5,8 @@ module;
 
 module presentation;
 
+import terminal;
+
 Presentation::Presentation(std::ifstream& file)
 {
     currSlide = 0;
@@ -37,18 +39,21 @@ void Presentation::start()
 {
     if (slides.empty())
         return;
-//draw the current slide, then wait for a key and Enter: n = next, p = previous, q = quit
-    std::string input;
+
+    rawMode(true);
+//draw the current slide, then wait for a key: right arrow = next, left arrow = previous, q = quit
     while (true) {
         slides[currSlide].render();
-        if (!std::getline(std::cin, input) || input == "q")
+        Key key = readKey();
+        if (key == Key::Quit)
             break;
 
-        if (input == "n" && currSlide < static_cast<int>(slides.size()) - 1)
+        if (key == Key::Right && currSlide < static_cast<int>(slides.size()) - 1)
             currSlide++;
-        else if (input == "p" && currSlide > 0)
+        else if (key == Key::Left && currSlide > 0)
             currSlide--;
     }
-//clear the last slide before exiting
+//clear the last slide and put the terminal back to normal before exiting
     std::cout << "\033[2J\033[H";
+    rawMode(false);
 }
