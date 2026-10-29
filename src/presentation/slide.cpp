@@ -1,5 +1,5 @@
 module;
-#include <iostream>
+#include <ncurses.h>
 #include <string>
 #include <utility>
 #include <vector>
@@ -140,22 +140,18 @@ Slide::Slide(std::string rawHTML) { // get the title of the slide, skipping any
     bulletStart = rawHTML.find("<li", bulletEnd + 5); // 5 = length of "</li>"
   }
 }
-// clear the screen and print the heading, bullet points and code block of the
+// clear the screen and print the heading, bullet points  and code block of the
 // slide
-void Slide::render() { // clear the screen and move the cursor to the top left
-  std::cout << "\033[2J\033[H";
-  Styler styler;
-  // a color given in the slide file replaces the theme's color;
-  // bold/italic/underline are still inherited
-  Style headStyle = styler.headingStyle();
-  if (headingColor != Color::Default)
-    headStyle.color = headingColor;
-  std::cout << styler.render(heading, headStyle) << "\n\n";
-  for (size_t i = 0; i < bullets.size(); i++) {
-    Style bulletStyle = styler.bodyStyle();
-    bulletStyle.color = bulletColors[i];
-    std::cout << "  - " << styler.render(bullets[i], bulletStyle) << "\n";
+void Slide::render() {
+  attron(A_BOLD);
+  printw("%s", heading.c_str());
+  attroff(A_BOLD);
+
+  for (auto point : bullets) {
+    printw("\n\t* %s", point.c_str());
   }
-  if (!codeLines.empty())
-    std::cout << "\n" << styler.codeBlock(codeLines) << "\n";
+
+  // for (const auto &line : codeLines) {
+  //   printw("%s\n", line.c_str());
+  // }
 }

@@ -41,30 +41,47 @@ Presentation::Presentation(std::ifstream &file) {
 }
 
 void Presentation::start() {
+  int key;
+
   if (slides.empty())
     return;
 
   initscr();
+  keypad(stdscr, TRUE);
+  curs_set(0);
 
-  while (true) {
-    printw("Slide %ld of %ld", std::distance(slides.begin(), slide) + 1, slides.size());
+  render();
 
-    // Render the current slide
-    (*slide).render();
-
-    refresh();
-
-    // Wait for key press
-    switch (getch()) {
+  while ((key = getch()) != 'q') {
+    switch (key) {
     case KEY_RIGHT:
-      slide = std::ranges::next(slide, 1, slides.end());
+      slide = std::ranges::next(slide, 1, slides.end() - 1);
       break;
     case KEY_LEFT:
       slide = std::ranges::prev(slide, 1, slides.begin());
       break;
-    case 'q':
-      endwin();
-      return;
+    case KEY_UP:
+      is_hidden = !is_hidden;
+      break;
     }
-  }
+    render();
+  };
+
+  endwin();
+}
+
+void Presentation::render() {
+  // Clear the screen
+  erase();
+
+  // Render the current slide
+  if (!is_hidden)
+    (*slide).render();
+
+  // Print this neat little debug info
+  mvprintw(getmaxy(stdscr) - 1, getmaxx(stdscr) - 20, "Slide %ld of %ld",
+           std::distance(slides.begin(), slide) + 1, slides.size());
+
+  // Refresh the screen
+  refresh();
 }
