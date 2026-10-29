@@ -16,6 +16,10 @@ public:
   void start();
 
 private:
-  int currSlide;
+  /// Whether or not the presentation is currently hidden
+  bool is_hidden = false;
+  std::vector<Slide>::iterator slide;
   std::vector<Slide> slides;
+
+  void render();
 };

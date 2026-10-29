@@ -1,15 +1,11 @@
 module;
 #include <fstream>
-#include <iostream>
+#include <ncurses.h>
 #include <string>
 
 module presentation;
 
-import terminal;
-
 Presentation::Presentation(std::ifstream &file) {
-  currSlide = 0;
-
   std::string document;
   std::string line;
   // turn the file into a single string
@@ -40,28 +36,52 @@ Presentation::Presentation(std::ifstream &file) {
     beginningOfSlide = document.find(
         "<article>", endOfSlide + 10); // 10 = length of "</article>"
   }
+
+  slide = slides.begin();
 }
-// show the slides one at a time and move between them based on the keys the
-// user presses
+
 void Presentation::start() {
+  int key;
+
   if (slides.empty())
     return;
 
-  rawMode(true);
-  // draw the current slide, then wait for a key: right arrow = next, left arrow
-  // = previous, q = quit
-  while (true) {
-    slides[currSlide].render();
-    Key key = readKey();
-    if (key == Key::Quit)
-      break;
+  initscr();
+  keypad(stdscr, TRUE);
+  curs_set(0);
 
-    if (key == Key::Right && currSlide < static_cast<int>(slides.size()) - 1)
-      currSlide++;
-    else if (key == Key::Left && currSlide > 0)
-      currSlide--;
-  }
-  // clear the last slide and put the terminal back to normal before exiting
-  std::cout << "\033[2J\033[H";
-  rawMode(false);
+  render();
+
+  while ((key = getch()) != 'q') {
+    switch (key) {
+    case KEY_RIGHT:
+      slide = std::ranges::next(slide, 1, slides.end() - 1);
+      break;
+    case KEY_LEFT:
+      slide = std::ranges::prev(slide, 1, slides.begin());
+      break;
+    case KEY_UP:
+      is_hidden = !is_hidden;
+      break;
+    }
+    render();
+  };
+
+  endwin();
+}
+
+void Presentation::render() {
+  // Clear the screen
+  erase();
+
+  // Render the current slide
+  if (!is_hidden)
+    (*slide).render();
+
+  // Print this neat little debug info
+  mvprintw(getmaxy(stdscr) - 1, getmaxx(stdscr) - 20, "Slide %ld of %ld",
+           std::distance(slides.begin(), slide) + 1, slides.size());
+
+  // Refresh the screen
+  refresh();
 }
