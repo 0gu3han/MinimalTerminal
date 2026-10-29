@@ -16,6 +16,6 @@ public:
   void start();
 
 private:
-  int currSlide;
+  std::vector<Slide>::iterator slide;
   std::vector<Slide> slides;
 };
