@@ -1,7 +1,10 @@
+
 module;
+#include <stdexcept>
 #include <fstream>
 #include <ncurses.h>
 #include <string>
+#include "navigation.hpp"
 
 module presentation;
 
@@ -41,10 +44,11 @@ Presentation::Presentation(std::ifstream &file) {
 }
 
 void Presentation::start() {
-  int key;
-
   if (slides.empty())
-    return;
+  throw std::runtime_error("Presentation contains no slides");
+
+  Navigation nav(slides.size());
+  int key;
 
   initscr();
   keypad(stdscr, TRUE);
@@ -52,23 +56,49 @@ void Presentation::start() {
 
   render();
 
-  while ((key = getch()) != 'q') {
+  while ((key = getch()) != 'q' && key != ERR) {
+    bool changed = false;
+
     switch (key) {
+    case 'n':
+    case ' ':
+    case '\n':
+    case '\r':
+    case KEY_ENTER:
     case KEY_RIGHT:
-      slide = std::ranges::next(slide, 1, slides.end() - 1);
+      changed = nav.next();
       break;
+    case 'p':
     case KEY_LEFT:
-      slide = std::ranges::prev(slide, 1, slides.begin());
+      changed = nav.previous();
+      break;
+    case 'g':
+    case KEY_HOME:
+      changed = nav.first();
+      break;
+    case 'G':
+    case KEY_END:
+      changed = nav.last();
       break;
     case KEY_UP:
       is_hidden = !is_hidden;
+      changed = true;
+      break;
+    case KEY_RESIZE:
+      changed = true;
       break;
     }
-    render();
-  };
+
+    if (changed)
+      slide = slides.begin() + nav.currentSlide();
+
+      render();
+
+  }
 
   endwin();
 }
+
 
 void Presentation::render() {
   // Clear the screen
@@ -78,9 +108,28 @@ void Presentation::render() {
   if (!is_hidden)
     (*slide).render();
 
-  // Print this neat little debug info
-  mvprintw(getmaxy(stdscr) - 1, getmaxx(stdscr) - 20, "Slide %ld of %ld",
-           std::distance(slides.begin(), slide) + 1, slides.size());
+  // Print navigation instructions and the current slide number
+  int rows = getmaxy(stdscr);
+  int cols = getmaxx(stdscr);
+
+  if (rows > 0 && cols > 0) {
+    const char *hint = "n/p: navigate, q: quit";
+    std::string position =
+        std::to_string(std::distance(slides.begin(), slide) + 1) +
+        "/" + std::to_string(slides.size());
+
+   int positionWidth = static_cast<int>(position.size());
+
+  if (cols >= positionWidth) {
+    int hintWidth = cols - positionWidth - 1;
+
+    if (hintWidth > 0)
+      mvaddnstr(rows - 1, 0, hint, hintWidth);
+
+    mvaddnstr(rows - 1, cols - positionWidth,
+            position.c_str(), positionWidth);
+    }
+  }
 
   // Refresh the screen
   refresh();

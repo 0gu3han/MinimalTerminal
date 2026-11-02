@@ -12,3 +12,6 @@ set(CURSES_NEED_NCURSES TRUE)
 find_package(Curses REQUIRED)
 target_include_directories(dynodeck PRIVATE ${CURSES_INCLUDE_DIRS})
 target_link_libraries(dynodeck PRIVATE ${CURSES_LIBRARIES})
+
+enable_testing()
+add_subdirectory(tests)

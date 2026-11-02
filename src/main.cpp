@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <exception>
 
 import presentation;
 
@@ -26,7 +27,12 @@ auto main(int argc, char *argv[]) -> int {
   file.close();
 
   // Invoke Presentation.start() method
-  presentation.start();
+  try {
+    presentation.start();
+  } catch (const std::exception &error) {
+    std::cerr << error.what() << "\n";
+    return 1;
+  }
 
   return 0;
 }
