@@ -1,7 +1,6 @@
 module;
 #include <ncurses.h>
 #include <string>
-#include <utility>
 #include <vector>
 
 module slide;
@@ -34,22 +33,6 @@ static std::string trim(const std::string &text) {
 
   size_t last = text.find_last_not_of(" \t");
   return text.substr(first, last - first + 1);
-}
-// replace the HTML entities that code needs, so `&lt;vector&gt;` shows as
-// `<vector>`
-static std::string decodeEntities(std::string text) {
-  const std::pair<std::string, std::string> entities[] = {
-      {"&lt;", "<"},  {"&gt;", ">"},  {"&quot;", "\""},
-      {"&#39;", "'"}, {"&amp;", "&"}, // &amp; last
-  };
-  for (const auto &[entity, character] : entities) {
-    size_t pos = 0;
-    while ((pos = text.find(entity, pos)) != std::string::npos) {
-      text.replace(pos, entity.size(), character);
-      pos += character.size();
-    }
-  }
-  return text;
 }
 
 // split the text inside <pre> into lines, keeping the indentation of each line
