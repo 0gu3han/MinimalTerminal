@@ -32,5 +32,6 @@ public:
 
 private:
   std::vector<Line> lines;
-  std::vector<std::string> codeLines;
+
+  void addCode(const std::string &code);
 };
