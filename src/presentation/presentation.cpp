@@ -6,11 +6,9 @@ module;
 module presentation;
 
 Presentation::Presentation(std::ifstream &file) {
+  // a text file has no '\0', so this reads the whole file
   std::string document;
-  std::string line;
-  // turn the file into a single string
-  while (std::getline(file, line))
-    document += line + "\n";
+  std::getline(file, document, '\0');
 
   // find the beginning of the presentation, and the end of the presentation
   size_t presentationStart = document.find("<main>");
