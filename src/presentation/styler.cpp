@@ -1,10 +1,12 @@
 module;
-#include <cctype>
 #include <ncurses.h>
 #include <string>
-#include <utility>
 
 module styler;
+
+// same order as the curses colors, so each name's index is its color number
+static const std::string colorNames[] = {"black", "red",     "green", "yellow",
+                                         "blue",  "magenta", "cyan",  "white"};
 
 void startColors() {
   start_color();
@@ -17,19 +19,16 @@ void startColors() {
   init_pair(codePair, COLOR_WHITE, 236);
 }
 
-Color colorFromName(const std::string &name) {
-  std::string lower;
-  for (unsigned char ch : name)
-    lower += static_cast<char>(std::tolower(ch));
+attr_t colorOf(const std::string &openingTag) {
+  size_t colorStart = openingTag.find("color:");
+  if (colorStart == std::string::npos)
+    return A_NORMAL;
 
-  const std::pair<const char *, Color> names[] = {
-      {"black", Color::Black}, {"red", Color::Red},
-      {"green", Color::Green}, {"yellow", Color::Yellow},
-      {"blue", Color::Blue},   {"magenta", Color::Magenta},
-      {"cyan", Color::Cyan},   {"white", Color::White},
-  };
-  for (const auto &[colorName, color] : names)
-    if (lower == colorName)
-      return color;
-  return Color::Default;
+  // skip past "color:" and any spaces after it
+  colorStart = openingTag.find_first_not_of(' ', colorStart + 6);
+  for (short color = COLOR_BLACK; color <= COLOR_WHITE; ++color)
+    if (openingTag.compare(colorStart, colorNames[color].size(),
+                           colorNames[color]) == 0)
+      return COLOR_PAIR(color + 1);
+  return A_NORMAL;
 }

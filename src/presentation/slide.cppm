@@ -1,9 +1,9 @@
 module;
+#include <ncurses.h>
 #include <string>
 #include <vector>
 
 export module slide;
-import styler;
 
 /// An opening tag and the content up to its closing tag
 export struct Element {
@@ -26,8 +26,8 @@ public:
 
 private:
   std::string heading;
-  Color headingColor = Color::Default;
+  attr_t headingColor = A_NORMAL;
   std::vector<std::string> bullets;
-  std::vector<Color> bulletColors;
+  std::vector<attr_t> bulletColors;
   std::vector<std::string> codeLines;
 };

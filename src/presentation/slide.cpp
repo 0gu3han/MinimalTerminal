@@ -95,21 +95,6 @@ static std::vector<std::string> toCodeLines(std::string code) {
   return lines;
 }
 
-// read the color from an opening tag's style attribute (e.g. <li style="color:
-// red">), or Color::Default if there is none
-static Color colorOf(const std::string &openingTag) {
-  size_t colorStart = openingTag.find("color:");
-  if (colorStart == std::string::npos)
-    return Color::Default;
-
-  size_t colorEnd = openingTag.find_first_of(
-      ";\">", colorStart); // the color ends at ; or the closing " or >
-  if (colorEnd == std::string::npos)
-    colorEnd = openingTag.size();
-  return colorFromName(trim(openingTag.substr(
-      colorStart + 6, colorEnd - colorStart - 6))); // 6 = length of "color:"
-}
-
 // extract the heading, code block and bullet points from the raw HTML of the
 // slide's <article> element
 Slide::Slide(std::string rawHTML) { // get the title of the slide, skipping any
