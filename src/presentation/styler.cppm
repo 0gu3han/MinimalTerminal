@@ -15,3 +15,6 @@ export std::string decodeEntities(std::string text);
 
 /// The curses color for a tag with a style like style="color: red"
 export attr_t colorOf(const std::string &openingTag);
+
+/// Draw text at the cursor with its <b>, <i> and <u> tags applied
+export void drawStyled(const std::string &html, attr_t style);

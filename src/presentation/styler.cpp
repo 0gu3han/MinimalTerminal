@@ -47,3 +47,25 @@ attr_t colorOf(const std::string &openingTag) {
       return COLOR_PAIR(color + 1);
   return A_NORMAL;
 }
+
+void drawStyled(const std::string &html, attr_t style) {
+  attrset(style);
+  for (size_t textStart = 0; textStart < html.size();) {
+    size_t tagStart = html.find('<', textStart);
+    // text between tags has no tags in it, so it is safe to decode
+    addstr(decodeEntities(html.substr(textStart, tagStart - textStart)).c_str());
+    if (tagStart == std::string::npos)
+      break;
+
+    // each tag turns bold, italic or underline on or off
+    bool closing = html[tagStart + 1] == '/';
+    char tag = html[tagStart + 1 + closing];
+    attr_t attribute = tag == 'b' ? A_BOLD : tag == 'i' ? A_ITALIC : A_UNDERLINE;
+    if (closing)
+      attroff(attribute);
+    else
+      attron(attribute);
+    textStart = html.find('>', tagStart) + 1;
+  }
+  attrset(A_NORMAL);
+}
