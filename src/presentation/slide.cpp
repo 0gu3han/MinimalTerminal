@@ -78,67 +78,24 @@ static std::vector<std::string> toCodeLines(std::string code) {
   return lines;
 }
 
-// extract the heading, code block and bullet points from the raw HTML of the
-// slide's <article> element
-Slide::Slide(std::string rawHTML) { // get the title of the slide, skipping any
-                                    // attributes in the opening tag
-  size_t titleStart = rawHTML.find("<h1");
-  size_t titleEnd = rawHTML.find("</h1>");
-  size_t titleContent = titleStart == std::string::npos
-                            ? std::string::npos
-                            : rawHTML.find('>', titleStart);
-  if (titleContent != std::string::npos && titleEnd != std::string::npos &&
-      titleContent < titleEnd) {
-    heading =
-        trim(rawHTML.substr(titleContent + 1, titleEnd - titleContent - 1));
-    headingColor =
-        colorOf(rawHTML.substr(titleStart, titleContent - titleStart));
-  }
-  // get the code block, then remove it so its text can't be mistaken for slide
-  // tags
-  size_t codeStart = rawHTML.find("<pre>");
-  size_t codeEnd = rawHTML.find("</pre>");
-  if (codeStart != std::string::npos && codeEnd != std::string::npos &&
-      codeStart < codeEnd) {
-    codeLines = toCodeLines(rawHTML.substr(
-        codeStart + 5, codeEnd - codeStart - 5));      // 5 = length of "<pre>"
-    rawHTML.erase(codeStart, codeEnd + 6 - codeStart); // 6 = length of "</pre>"
-  }
-  // get the bullet points together
-  size_t firstBullet = rawHTML.find("<ul");
-  size_t lastBullet = rawHTML.find("</ul>");
-  if (firstBullet == std::string::npos || lastBullet == std::string::npos)
-    return;
-  // get each individual bullet point, skipping any attributes, and add it to
-  // the bullets vector
-  size_t bulletStart = rawHTML.find("<li", firstBullet);
-  while (bulletStart != std::string::npos && bulletStart < lastBullet) {
-    size_t contentStart = rawHTML.find('>', bulletStart);
-    if (contentStart == std::string::npos)
-      break;
-    size_t bulletEnd = rawHTML.find("</li>", contentStart);
-    if (bulletEnd == std::string::npos)
-      break;
-
-    bullets.push_back(
-        trim(rawHTML.substr(contentStart + 1, bulletEnd - contentStart - 1)));
-    bulletColors.push_back(
-        colorOf(rawHTML.substr(bulletStart, contentStart - bulletStart)));
-    bulletStart = rawHTML.find("<li", bulletEnd + 5); // 5 = length of "</li>"
+// turn each heading, bullet and code block into lines in the order written
+Slide::Slide(const std::string &html) {
+  for (const Element &element : findAll(html, {"h1", "li", "code"})) {
+    const std::string &tag = element.openingTag;
+    if (tag.starts_with("<h1"))
+      lines.push_back({trim(element.content), A_BOLD | colorOf(tag), 0});
+    else if (tag.starts_with("<li"))
+      lines.push_back({"* " + trim(element.content), colorOf(tag), 8});
+    else
+      codeLines = toCodeLines(element.content);
   }
 }
-// clear the screen and print the heading, bullet points  and code block of the
-// slide
+
+// draw each line on its own row
 void Slide::render() {
-  attron(A_BOLD);
-  printw("%s", heading.c_str());
-  attroff(A_BOLD);
-
-  for (auto point : bullets) {
-    printw("\n\t* %s", point.c_str());
+  int row = 0;
+  for (const Line &line : lines) {
+    move(row++, line.column);
+    drawStyled(line.text, line.style);
   }
-
-  // for (const auto &line : codeLines) {
-  //   printw("%s\n", line.c_str());
-  // }
 }

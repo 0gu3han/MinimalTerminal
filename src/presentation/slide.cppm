@@ -15,19 +15,22 @@ export struct Element {
 export std::vector<Element> findAll(const std::string &html,
                                     const std::vector<std::string> &tags);
 
+/// One row of the slide and how to draw it
+struct Line {
+  std::string text;
+  attr_t style;
+  int column;
+};
+
 export class Slide {
 public:
-  /// @brief
-  /// @param rawHTML The contents of the slide's <article> element
-  Slide(std::string rawHTML);
+  /// html is everything inside the slide's article
+  Slide(const std::string &html);
 
   /// @brief  Write the content of the slide to the terminal window
   void render();
 
 private:
-  std::string heading;
-  attr_t headingColor = A_NORMAL;
-  std::vector<std::string> bullets;
-  std::vector<attr_t> bulletColors;
+  std::vector<Line> lines;
   std::vector<std::string> codeLines;
 };
