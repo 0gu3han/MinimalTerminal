@@ -4,6 +4,7 @@ module;
 #include <string>
 
 module presentation;
+import styler;
 
 Presentation::Presentation(std::ifstream &file) {
   // a text file has no '\0', so this reads the whole file
@@ -24,6 +25,7 @@ void Presentation::start() {
     return;
 
   initscr();
+  startColors();
   keypad(stdscr, TRUE);
   curs_set(0);
 
