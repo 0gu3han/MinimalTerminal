@@ -4,6 +4,7 @@ module;
 #include <string>
 
 module presentation;
+import styler;
 
 Presentation::Presentation(std::ifstream &file) {
   // a text file has no '\0', so this reads the whole file
@@ -11,8 +12,11 @@ Presentation::Presentation(std::ifstream &file) {
   std::getline(file, document, '\0');
 
   // each article is one slide
-  for (const Element &article : findAll(document, {"article"}))
-    slides.emplace_back(article.content);
+  const auto presentations = findAll(document, {"main"});
+  if (!presentations.empty())
+    for (const Element &article :
+         findAll(presentations.front().content, {"article"}))
+      slides.emplace_back(article.content);
 
   slide = slides.begin();
 }
@@ -24,6 +28,7 @@ void Presentation::start() {
     return;
 
   initscr();
+  startColors();
   keypad(stdscr, TRUE);
   curs_set(0);
 
