@@ -74,9 +74,8 @@ Slide::Slide(const std::string &html) {
 
 // draw each line on its own row
 void Slide::render() {
-  int row = 0;
   for (const Line &line : lines) {
-    move(row++, line.column);
+    move(getcury(stdscr) + 1, line.column);
     drawStyled(line.text, line.style);
   }
 }
