@@ -12,8 +12,11 @@ Presentation::Presentation(std::ifstream &file) {
   std::getline(file, document, '\0');
 
   // each article is one slide
-  for (const Element &article : findAll(document, {"article"}))
-    slides.emplace_back(article.content);
+  const auto presentations = findAll(document, {"main"});
+  if (!presentations.empty())
+    for (const Element &article :
+         findAll(presentations.front().content, {"article"}))
+      slides.emplace_back(article.content);
 
   slide = slides.begin();
 }
