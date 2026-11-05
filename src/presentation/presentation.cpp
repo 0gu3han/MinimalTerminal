@@ -6,36 +6,13 @@ module;
 module presentation;
 
 Presentation::Presentation(std::ifstream &file) {
+  // a text file has no '\0', so this reads the whole file
   std::string document;
-  std::string line;
-  // turn the file into a single string
-  while (std::getline(file, line))
-    document += line + "\n";
+  std::getline(file, document, '\0');
 
-  // find the beginning of the presentation, and the end of the presentation
-  size_t presentationStart = document.find("<main>");
-  size_t presentationEnd = document.find("</main>");
-  if (presentationStart == std::string::npos ||
-      presentationEnd == std::string::npos)
-    return;
-  // after finding the start of the presentation, find each slide and add it to
-  // the slides vector
-  size_t beginningOfSlide = document.find("<article>", presentationStart);
-  while (beginningOfSlide != std::string::npos &&
-         beginningOfSlide < presentationEnd) {
-    size_t endOfSlide = document.find(
-        "</article>", beginningOfSlide + 9); // 9 = length of "<article>"
-    if (endOfSlide == std::string::npos)
-      break;
-
-    // extract the content between <article> and </article> and pass it to the
-    // Slide constructor, then add the resulting Slide instance to the slides
-    // vector
-    slides.push_back(Slide(document.substr(beginningOfSlide + 9,
-                                           endOfSlide - beginningOfSlide - 9)));
-    beginningOfSlide = document.find(
-        "<article>", endOfSlide + 10); // 10 = length of "</article>"
-  }
+  // each article is one slide
+  for (const Element &article : findAll(document, {"article"}))
+    slides.emplace_back(article.content);
 
   slide = slides.begin();
 }

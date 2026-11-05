@@ -5,6 +5,16 @@ module;
 export module slide;
 import styler;
 
+/// An opening tag and the content up to its closing tag
+export struct Element {
+  std::string openingTag;
+  std::string content;
+};
+
+/// Every element with one of the tags, in the order they are written
+export std::vector<Element> findAll(const std::string &html,
+                                    const std::vector<std::string> &tags);
+
 export class Slide {
 public:
   /// @brief

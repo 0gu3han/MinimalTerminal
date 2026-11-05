@@ -7,6 +7,25 @@ module;
 module slide;
 import styler;
 
+std::vector<Element> findAll(const std::string &html,
+                             const std::vector<std::string> &tags) {
+  std::vector<Element> elements;
+  for (size_t start = html.find('<'); start != std::string::npos;
+       start = html.find('<', start + 1))
+    for (const std::string &tag : tags)
+      // check if one of the tags opens here
+      if (html.compare(start + 1, tag.size(), tag) == 0) {
+        size_t contentStart = html.find('>', start) + 1;
+        size_t closing = html.find("</" + tag + ">", contentStart);
+        elements.push_back({html.substr(start, contentStart - start),
+                            html.substr(contentStart, closing - contentStart)});
+        // jump past the content so tags inside it are not matched
+        start = closing;
+        break;
+      }
+  return elements;
+}
+
 // remove spaces and tabs from both ends of the text
 static std::string trim(const std::string &text) {
   size_t first = text.find_first_not_of(" \t");
