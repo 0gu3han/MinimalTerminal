@@ -50,6 +50,20 @@ void Slide::addCode(const std::string &html) {
   lines.push_back({"", COLOR_PAIR(codePair), 0});
 }
 
+// add a blank line, then each line the code printed
+void Slide::addOutput(const std::string &html) {
+  isOutput = true;
+  lines.push_back({"", A_NORMAL, 0});
+  // skip the line break after <output> and the indent before </output>
+  size_t start = html.find('\n') + 1;
+  size_t end;
+  // the lines stay encoded so drawStyled never reads output as a tag
+  while ((end = html.find('\n', start)) != std::string::npos) {
+    lines.push_back({html.substr(start, end - start), A_NORMAL, 4});
+    start = end + 1;
+  }
+}
+
 // draw the code lines padded to the same width so the box is a rectangle
 void Slide::drawCode() {
   size_t width = 0;
@@ -69,15 +83,24 @@ void Slide::drawCode() {
 
 // turn each heading, bullet and code block into lines in the order written
 Slide::Slide(const std::string &html) {
-  for (const Element &element : findAll(html, {"h1", "li", "code"})) {
+  for (const Element &element :
+       findAll(html, {"h1", "li", "code", "output"})) {
     const std::string &tag = element.openingTag;
     if (tag.starts_with("<h1"))
       lines.push_back({trim(element.content), A_BOLD | colorOf(tag), 0});
     else if (tag.starts_with("<li"))
       lines.push_back({"* " + trim(element.content), colorOf(tag), 8});
+    else if (tag.starts_with("<output"))
+      addOutput(element.content);
     // only the first code block is kept, since that is the one to edit
-    else if (code.empty())
+    else if (code.empty()) {
       addCode(element.content);
+      // the name runs from "language-" to the closing quote
+      size_t name = tag.find("language-");
+      if (name != std::string::npos)
+        language = tag.substr(name + 9, tag.find_first_of("\" >", name) -
+                                            name - 9); // 9 = "language-"
+    }
   }
 }
 
@@ -98,6 +121,13 @@ std::string Slide::codeHTML() const {
   for (const std::string &line : code)
     html += "\n" + encodeEntities(line);
   return html;
+}
+
+std::string Slide::codeText() const {
+  std::string text;
+  for (const std::string &line : code)
+    text += line + "\n";
+  return text;
 }
 
 bool Slide::edit() {

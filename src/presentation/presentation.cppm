@@ -27,6 +27,10 @@ private:
   std::string fileName;
 
   void render();
+  /// Where the slide's <article> starts in the document
+  size_t articleStart(std::vector<Slide>::iterator article);
   /// Write the current slide's code into the file
   void save();
+  /// Run the current slide's code and show what it printed on the next slide
+  void runCode();
 };

@@ -1,7 +1,11 @@
 module;
+#include <csignal>
+#include <cstdio>
+#include <filesystem>
 #include <fstream>
 #include <ncurses.h>
 #include <string>
+#include <sys/wait.h>
 
 module presentation;
 import styler;
@@ -51,8 +55,10 @@ void Presentation::start() {
       is_hidden = !is_hidden;
       break;
     case 'i':
-      if (!is_hidden && slide->hasCode() && slide->edit())
+      if (!is_hidden && slide->hasCode() && slide->edit()) {
         save();
+        runCode();
+      }
       break;
     }
     render();
@@ -61,17 +67,89 @@ void Presentation::start() {
   endwin();
 }
 
-void Presentation::save() {
-  // find the slide's article, then the first code element in it, the same one
-  // the slide was made from
+size_t Presentation::articleStart(std::vector<Slide>::iterator article) {
   size_t start = document.find("<main");
-  for (auto article = slides.begin(); article <= slide; ++article)
+  for (auto other = slides.begin(); other <= article; ++other)
     start = document.find("<article", start + 1);
-  start = document.find('>', document.find("<code", start)) + 1;
+  return start;
+}
+
+void Presentation::save() {
+  // find the first code element in the slide's article, the same one the slide
+  // was made from
+  size_t start =
+      document.find('>', document.find("<code", articleStart(slide))) + 1;
 
   // replace up to the last line break, keeping the indent before </code>
   size_t end = document.rfind('\n', document.find("</code>", start));
   document.replace(start, end - start, slide->codeHTML());
+  std::ofstream(fileName) << document;
+}
+
+// write the code to a file in the temp folder and run it, giving back the
+// first lines it printed, errors included
+static std::string run(const std::string &code, const std::string &language) {
+  const auto folder = std::filesystem::temp_directory_path() / "dynodeck";
+  std::filesystem::create_directories(folder);
+  const std::string source = language == "python" ? "main.py" : "main.cpp";
+  std::ofstream(folder / source) << code;
+
+  // perl's alarm stops a program after 5 seconds, since macOS has no timeout
+  // command
+  const std::string limit = "perl -e 'alarm shift; exec @ARGV' 5 ";
+  std::string command = language == "python"
+                            ? limit + "python3 main.py"
+                            : "c++ -std=c++23 main.cpp -o main && " + limit +
+                                  "./main";
+  // run in the folder so errors say main.cpp instead of the whole path, with
+  // no input so a program that reads from cin doesn't wait forever. The outer
+  // 2>/dev/null hides the shell's own "Alarm clock" message
+  command = "(cd '" + folder.string() + "' && (" + command +
+            ") < /dev/null 2>&1) 2>/dev/null";
+
+  std::string output;
+  int lineCount = 0;
+  FILE *pipe = popen(command.c_str(), "r");
+  char buffer[256];
+  while (fgets(buffer, sizeof buffer, pipe))
+    // keep reading after 100 lines so the program can finish
+    if (lineCount < 100) {
+      output += buffer;
+      lineCount += output.back() == '\n';
+    }
+  if (!output.empty() && output.back() != '\n')
+    output += "\n";
+  // the shell gives 128 + 14 when SIGALRM stops the program
+  int status = pclose(pipe);
+  if (WEXITSTATUS(status) == 128 + SIGALRM)
+    output += "Stopped after 5 seconds\n";
+  return output;
+}
+
+void Presentation::runCode() {
+  const std::string &language = slide->codeLanguage();
+  if (language != "cpp" && language != "python")
+    return;
+
+  mvaddstr(getmaxy(stdscr) - 1, 0, "Running...");
+  clrtoeol();
+  refresh();
+  const std::string html = "\n        <output>\n" +
+                           encodeEntities(run(slide->codeText(), language)) +
+                           "        </output>\n    ";
+
+  // the output goes in its own article right after the code's article,
+  // replacing the output from the last run if it is there
+  size_t codeEnd = document.find("</article>", articleStart(slide)) +
+                   10; // 10 = length of "</article>"
+  if (slide + 1 != slides.end() && (slide + 1)->showsOutput()) {
+    size_t start = document.find('>', articleStart(slide + 1)) + 1;
+    document.replace(start, document.find("</article>", start) - start, html);
+    *(slide + 1) = Slide(html);
+  } else {
+    document.insert(codeEnd, "\n    <article>" + html + "</article>");
+    slide = slides.insert(slide + 1, Slide(html)) - 1;
+  }
   std::ofstream(fileName) << document;
 }
 

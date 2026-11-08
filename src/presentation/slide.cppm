@@ -41,6 +41,15 @@ public:
   /// The code as it goes inside <code>, starting with a line break
   std::string codeHTML() const;
 
+  /// The code as plain text, to run it
+  std::string codeText() const;
+
+  /// The language from class="language-cpp", or empty if none is given
+  const std::string &codeLanguage() const { return language; }
+
+  /// Whether the slide shows the output of the code before it
+  bool showsOutput() const { return isOutput; }
+
 private:
   std::vector<Line> lines;
   /// The lines of the slide's code block as they show on screen, so they can
@@ -48,7 +57,10 @@ private:
   std::vector<std::string> code;
   /// The screen row of the first code line, set when the code is drawn
   int codeRow = 0;
+  std::string language;
+  bool isOutput = false;
 
   void addCode(const std::string &html);
+  void addOutput(const std::string &html);
   void drawCode();
 };
