@@ -93,6 +93,13 @@ void Slide::render() {
   }
 }
 
+std::string Slide::codeHTML() const {
+  std::string html;
+  for (const std::string &line : code)
+    html += "\n" + encodeEntities(line);
+  return html;
+}
+
 bool Slide::edit() {
   const std::vector<std::string> original = code;
   size_t row = 0;

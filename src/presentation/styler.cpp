@@ -34,6 +34,22 @@ std::string decodeEntities(std::string text) {
   return text;
 }
 
+std::string encodeEntities(std::string text) {
+  const std::string entities[][2] = {
+      {"&", "&amp;"}, // & first so the & of &lt; is not encoded again
+      {"<", "&lt;"},
+      {">", "&gt;"},
+  };
+  for (const auto &[character, entity] : entities) {
+    size_t pos = 0;
+    while ((pos = text.find(character, pos)) != std::string::npos) {
+      text.replace(pos, character.size(), entity);
+      pos += entity.size();
+    }
+  }
+  return text;
+}
+
 attr_t colorOf(const std::string &openingTag) {
   size_t colorStart = openingTag.find("color:");
   if (colorStart == std::string::npos)

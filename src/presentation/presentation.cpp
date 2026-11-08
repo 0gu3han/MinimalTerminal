@@ -6,9 +6,9 @@ module;
 module presentation;
 import styler;
 
-Presentation::Presentation(std::ifstream &file) {
+Presentation::Presentation(std::ifstream &file, const std::string &fileName)
+    : fileName(fileName) {
   // a text file has no '\0', so this reads the whole file
-  std::string document;
   std::getline(file, document, '\0');
 
   // each article is one slide
@@ -51,14 +51,28 @@ void Presentation::start() {
       is_hidden = !is_hidden;
       break;
     case 'i':
-      if (!is_hidden && slide->hasCode())
-        slide->edit();
+      if (!is_hidden && slide->hasCode() && slide->edit())
+        save();
       break;
     }
     render();
   };
 
   endwin();
+}
+
+void Presentation::save() {
+  // find the slide's article, then the first code element in it, the same one
+  // the slide was made from
+  size_t start = document.find("<main");
+  for (auto article = slides.begin(); article <= slide; ++article)
+    start = document.find("<article", start + 1);
+  start = document.find('>', document.find("<code", start)) + 1;
+
+  // replace up to the last line break, keeping the indent before </code>
+  size_t end = document.rfind('\n', document.find("</code>", start));
+  document.replace(start, end - start, slide->codeHTML());
+  std::ofstream(fileName) << document;
 }
 
 void Presentation::render() {

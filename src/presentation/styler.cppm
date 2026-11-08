@@ -13,6 +13,9 @@ export void startColors();
 /// Turn &lt; &gt; &quot; &#39; &amp; back into < > " ' &
 export std::string decodeEntities(std::string text);
 
+/// Turn & < > into &amp; &lt; &gt; so text can go back into the HTML
+export std::string encodeEntities(std::string text);
+
 /// The curses color for a tag with a style like style="color: red"
 export attr_t colorOf(const std::string &openingTag);
 

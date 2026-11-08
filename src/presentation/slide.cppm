@@ -38,6 +38,9 @@ public:
   /// @return Whether the changes were kept
   bool edit();
 
+  /// The code as it goes inside <code>, starting with a line break
+  std::string codeHTML() const;
+
 private:
   std::vector<Line> lines;
   /// The lines of the slide's code block as they show on screen, so they can
