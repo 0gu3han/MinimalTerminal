@@ -32,6 +32,10 @@ public:
 
 private:
   std::vector<Line> lines;
+  /// The lines of the slide's code block as they show on screen, so they can
+  /// be edited
+  std::vector<std::string> code;
 
-  void addCode(const std::string &code);
+  void addCode(const std::string &html);
+  void drawCode();
 };

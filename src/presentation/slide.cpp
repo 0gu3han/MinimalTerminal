@@ -35,28 +35,35 @@ static std::string trim(const std::string &text) {
   return text.substr(first, last - first + 1);
 }
 
-// add a blank line, then the code lines padded to the same width so the box is
-// a rectangle
-void Slide::addCode(const std::string &code) {
-  std::vector<std::string> codeLines;
-  size_t width = 0;
+// keep the decoded code lines, and mark where the code box goes with a blank
+// line in the code color
+void Slide::addCode(const std::string &html) {
   // skip the line break after <code> and the indent before </code>
-  size_t start = code.find('\n') + 1;
+  size_t start = html.find('\n') + 1;
   size_t end;
-  while ((end = code.find('\n', start)) != std::string::npos) {
-    codeLines.push_back(code.substr(start, end - start));
-    // measure the decoded text since that is what shows on screen
-    if (decodeEntities(codeLines.back()).size() > width)
-      width = decodeEntities(codeLines.back()).size();
+  while ((end = html.find('\n', start)) != std::string::npos) {
+    code.push_back(decodeEntities(html.substr(start, end - start)));
     start = end + 1;
   }
 
   lines.push_back({"", A_NORMAL, 0});
-  // the lines stay encoded so drawStyled never reads code as a tag
-  for (const std::string &line : codeLines)
-    lines.push_back(
-        {" " + line + std::string(width - decodeEntities(line).size() + 1, ' '),
-         COLOR_PAIR(codePair), 4});
+  lines.push_back({"", COLOR_PAIR(codePair), 0});
+}
+
+// draw the code lines padded to the same width so the box is a rectangle
+void Slide::drawCode() {
+  size_t width = 0;
+  for (const std::string &line : code)
+    if (line.size() > width)
+      width = line.size();
+
+  // addstr instead of drawStyled so code is never read as a tag
+  attrset(COLOR_PAIR(codePair));
+  for (const std::string &line : code) {
+    move(getcury(stdscr) + 1, 4);
+    addstr((" " + line + std::string(width - line.size() + 1, ' ')).c_str());
+  }
+  attrset(A_NORMAL);
 }
 
 // turn each heading, bullet and code block into lines in the order written
@@ -67,7 +74,8 @@ Slide::Slide(const std::string &html) {
       lines.push_back({trim(element.content), A_BOLD | colorOf(tag), 0});
     else if (tag.starts_with("<li"))
       lines.push_back({"* " + trim(element.content), colorOf(tag), 8});
-    else
+    // only the first code block is kept, since that is the one to edit
+    else if (code.empty())
       addCode(element.content);
   }
 }
@@ -75,6 +83,10 @@ Slide::Slide(const std::string &html) {
 // draw each line on its own row
 void Slide::render() {
   for (const Line &line : lines) {
+    if (line.style == COLOR_PAIR(codePair)) {
+      drawCode();
+      continue;
+    }
     move(getcury(stdscr) + 1, line.column);
     drawStyled(line.text, line.style);
   }
