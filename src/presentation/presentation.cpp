@@ -29,7 +29,12 @@ void Presentation::start() {
 
   initscr();
   startColors();
+  // read keys as they are pressed, without printing them
+  cbreak();
+  noecho();
   keypad(stdscr, TRUE);
+  // so Esc doesn't wait a whole second to see if it starts an arrow key
+  set_escdelay(25);
   curs_set(0);
 
   render();
@@ -44,6 +49,10 @@ void Presentation::start() {
       break;
     case KEY_UP:
       is_hidden = !is_hidden;
+      break;
+    case 'i':
+      if (!is_hidden && slide->hasCode())
+        slide->edit();
       break;
     }
     render();

@@ -57,6 +57,7 @@ void Slide::drawCode() {
     if (line.size() > width)
       width = line.size();
 
+  codeRow = getcury(stdscr) + 1;
   // addstr instead of drawStyled so code is never read as a tag
   attrset(COLOR_PAIR(codePair));
   for (const std::string &line : code) {
@@ -89,5 +90,80 @@ void Slide::render() {
     }
     move(getcury(stdscr) + 1, line.column);
     drawStyled(line.text, line.style);
+  }
+}
+
+bool Slide::edit() {
+  const std::vector<std::string> original = code;
+  size_t row = 0;
+  size_t column = 0;
+  curs_set(1);
+
+  while (true) {
+    erase();
+    render();
+    mvaddstr(getmaxy(stdscr) - 1, 0,
+             "-- INSERT --   Esc: keep changes   Ctrl-X: undo changes");
+    // the code starts after the 4 column indent and 1 space of padding
+    move(codeRow + row, 5 + column);
+    refresh();
+
+    int key = getch();
+    std::string &line = code[row];
+    switch (key) {
+    case 27: // Esc
+      curs_set(0);
+      return true;
+    case 24: // Ctrl-X
+      code = original;
+      curs_set(0);
+      return false;
+    case KEY_UP:
+      if (row > 0)
+        --row;
+      break;
+    case KEY_DOWN:
+      if (row + 1 < code.size())
+        ++row;
+      break;
+    case KEY_LEFT:
+      if (column > 0)
+        --column;
+      break;
+    case KEY_RIGHT:
+      if (column < line.size())
+        ++column;
+      break;
+    case KEY_BACKSPACE:
+    case 127:
+    case 8:
+      if (column > 0) {
+        line.erase(--column, 1);
+      } else if (row > 0) {
+        // join this line onto the end of the one above
+        column = code[row - 1].size();
+        code[row - 1] += line;
+        code.erase(code.begin() + row--);
+      }
+      break;
+    case '\n':
+      // split the line at the cursor
+      code.insert(code.begin() + row + 1, line.substr(column));
+      code[row].erase(column);
+      ++row;
+      column = 0;
+      break;
+    case '\t':
+      // spaces, since a tab would break the box alignment
+      line.insert(column, 4, ' ');
+      column += 4;
+      break;
+    default:
+      if (key >= ' ' && key <= '~')
+        line.insert(column++, 1, key);
+    }
+    // stay inside the line after moving up or down
+    if (column > code[row].size())
+      column = code[row].size();
   }
 }
