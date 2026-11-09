@@ -34,7 +34,7 @@ static bool isWord(unsigned char character) {
 }
 
 std::vector<attr_t> highlight(const std::string &line,
-                              const std::string &language) {
+                              const std::string &language, std::string &open) {
   std::vector<attr_t> styles(line.size(), COLOR_PAIR(codePair));
   const bool python = language == "python";
   if (!python && language != "cpp")
@@ -47,10 +47,28 @@ std::vector<attr_t> highlight(const std::string &line,
     size_t end = start + 1;
     short pair = codePair;
 
-    if (python ? character == '#' : line.compare(start, 2, "//") == 0) {
+    if (!open.empty()) {
+      // still inside a comment or string, up to where it closes
+      size_t close = line.find(open, start);
+      end = close == std::string::npos ? line.size() : close + open.size();
+      pair = open == "*/" ? commentPair : stringPair;
+      if (close != std::string::npos)
+        open.clear();
+    } else if (python ? character == '#' : line.compare(start, 2, "//") == 0) {
       // a comment runs to the end of the line
       end = line.size();
       pair = commentPair;
+    } else if (!python && line.compare(start, 2, "/*") == 0) {
+      // the next piece finds where the comment closes, maybe on a later line
+      open = "*/";
+      end = start + 2;
+      pair = commentPair;
+    } else if (python && (line.compare(start, 3, "\"\"\"") == 0 ||
+                          line.compare(start, 3, "'''") == 0)) {
+      // same for a string in triple quotes
+      open = line.substr(start, 3);
+      end = start + 3;
+      pair = stringPair;
     } else if (!python && character == '#') {
       // so does #include and the like
       end = line.size();

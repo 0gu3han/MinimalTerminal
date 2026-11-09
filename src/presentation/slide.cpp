@@ -75,11 +75,12 @@ void Slide::drawCode() {
   codeRow = getcury(stdscr) + 1;
   // one character at a time instead of drawStyled, so code is never read as a
   // tag and each character gets its highlight color
+  std::string open;
   for (const std::string &line : code) {
     move(getcury(stdscr) + 1, 4);
     attrset(COLOR_PAIR(codePair));
     addch(' ');
-    const std::vector<attr_t> styles = highlight(line, language);
+    const std::vector<attr_t> styles = highlight(line, language, open);
     for (size_t i = 0; i < line.size(); ++i)
       addch(static_cast<unsigned char>(line[i]) | styles[i]);
     attrset(COLOR_PAIR(codePair));
