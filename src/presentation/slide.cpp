@@ -4,6 +4,7 @@ module;
 #include <vector>
 
 module slide;
+import highlighter;
 import styler;
 
 std::vector<Element> findAll(const std::string &html,
@@ -72,11 +73,17 @@ void Slide::drawCode() {
       width = line.size();
 
   codeRow = getcury(stdscr) + 1;
-  // addstr instead of drawStyled so code is never read as a tag
-  attrset(COLOR_PAIR(codePair));
+  // one character at a time instead of drawStyled, so code is never read as a
+  // tag and each character gets its highlight color
   for (const std::string &line : code) {
     move(getcury(stdscr) + 1, 4);
-    addstr((" " + line + std::string(width - line.size() + 1, ' ')).c_str());
+    attrset(COLOR_PAIR(codePair));
+    addch(' ');
+    const std::vector<attr_t> styles = highlight(line, language);
+    for (size_t i = 0; i < line.size(); ++i)
+      addch(static_cast<unsigned char>(line[i]) | styles[i]);
+    attrset(COLOR_PAIR(codePair));
+    addstr(std::string(width - line.size() + 1, ' ').c_str());
   }
   attrset(A_NORMAL);
 }
