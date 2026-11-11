@@ -17,6 +17,12 @@ void startColors() {
     init_pair(color + 1, color, -1);
   // white on dark grey for code
   init_pair(codePair, COLOR_WHITE, 236);
+  init_pair(keywordPair, COLOR_MAGENTA, 236);
+  init_pair(stringPair, COLOR_GREEN, 236);
+  // a lighter grey so comments are quieter than the code
+  init_pair(commentPair, 245, 236);
+  init_pair(numberPair, COLOR_YELLOW, 236);
+  init_pair(preprocessorPair, COLOR_CYAN, 236);
 }
 
 std::string decodeEntities(std::string text) {
@@ -29,6 +35,22 @@ std::string decodeEntities(std::string text) {
     while ((pos = text.find(entity, pos)) != std::string::npos) {
       text.replace(pos, entity.size(), character);
       pos += character.size();
+    }
+  }
+  return text;
+}
+
+std::string encodeEntities(std::string text) {
+  const std::string entities[][2] = {
+      {"&", "&amp;"}, // & first so the & of &lt; is not encoded again
+      {"<", "&lt;"},
+      {">", "&gt;"},
+  };
+  for (const auto &[character, entity] : entities) {
+    size_t pos = 0;
+    while ((pos = text.find(character, pos)) != std::string::npos) {
+      text.replace(pos, character.size(), entity);
+      pos += entity.size();
     }
   }
   return text;
