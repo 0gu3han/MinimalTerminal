@@ -20,7 +20,9 @@ Presentation::Presentation(std::ifstream &file, const std::string &fileName)
   if (!presentations.empty())
     for (const Element &article :
          findAll(presentations.front().content, {"article"}))
-      slides.emplace_back(article.content);
+      slides.emplace_back(article.content,
+                          presentations.front().contentStart +
+                              article.contentStart);
 
   slide = slides.begin();
 }
@@ -75,13 +77,12 @@ size_t Presentation::articleStart(std::vector<Slide>::iterator article) {
 }
 
 void Presentation::save() {
-  // find the first code element in the slide's article, the same one the slide
-  // was made from
-  size_t start =
-      document.find('>', document.find("<code", articleStart(slide))) + 1;
+  const size_t start = slide->codeStart();
+  const size_t end = slide->codeEnd();
+  if (start == std::string::npos || end == std::string::npos || start > end ||
+      end > document.size())
+    return;
 
-  // replace up to the last line break, keeping the indent before </code>
-  size_t end = document.rfind('\n', document.find("</code>", start));
   document.replace(start, end - start, slide->codeHTML());
   std::ofstream(fileName) << document;
 }

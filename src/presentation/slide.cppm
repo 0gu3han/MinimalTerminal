@@ -9,6 +9,8 @@ export module slide;
 export struct Element {
   std::string openingTag;
   std::string content;
+  size_t contentStart;
+  size_t contentEnd;
 };
 
 /// Every element with one of the tags, in the order they are written
@@ -25,7 +27,7 @@ struct Line {
 export class Slide {
 public:
   /// html is everything inside the slide's article
-  Slide(const std::string &html);
+  Slide(const std::string &html, size_t sourceStart = 0);
 
   /// @brief  Write the content of the slide to the terminal window
   void render();
@@ -44,6 +46,9 @@ public:
   /// The code as plain text, to run it
   std::string codeText() const;
 
+  size_t codeStart() const { return codeSourceStart; }
+  size_t codeEnd() const { return codeSourceEnd; }
+
   /// The language from class="language-cpp", or empty if none is given
   const std::string &codeLanguage() const { return language; }
 
@@ -55,6 +60,8 @@ private:
   /// The lines of the slide's code block as they show on screen, so they can
   /// be edited
   std::vector<std::string> code;
+  size_t codeSourceStart = std::string::npos;
+  size_t codeSourceEnd = std::string::npos;
   /// The screen row of the first code line, set when the code is drawn
   int codeRow = 0;
   std::string language;

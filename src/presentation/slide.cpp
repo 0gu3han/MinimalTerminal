@@ -18,7 +18,8 @@ std::vector<Element> findAll(const std::string &html,
         size_t contentStart = html.find('>', start) + 1;
         size_t closing = html.find("</" + tag + ">", contentStart);
         elements.push_back({html.substr(start, contentStart - start),
-                            html.substr(contentStart, closing - contentStart)});
+                            html.substr(contentStart, closing - contentStart),
+                            contentStart, closing});
         // jump past the content so tags inside it are not matched
         start = closing;
         break;
@@ -90,7 +91,7 @@ void Slide::drawCode() {
 }
 
 // turn each heading, bullet and code block into lines in the order written
-Slide::Slide(const std::string &html) {
+Slide::Slide(const std::string &html, size_t sourceStart) {
   for (const Element &element :
        findAll(html, {"h1", "li", "code", "output"})) {
     const std::string &tag = element.openingTag;
@@ -103,6 +104,12 @@ Slide::Slide(const std::string &html) {
     // only the first code block is kept, since that is the one to edit
     else if (code.empty()) {
       addCode(element.content);
+      codeSourceStart = sourceStart + element.contentStart;
+      const size_t lastLineBreak = element.content.rfind('\n');
+      codeSourceEnd =
+          sourceStart + (lastLineBreak == std::string::npos
+                             ? element.contentEnd
+                             : element.contentStart + lastLineBreak);
       // the name runs from "language-" to the closing quote
       size_t name = tag.find("language-");
       if (name != std::string::npos)
