@@ -32,8 +32,8 @@ public:
   /// @brief  Write the content of the slide to the terminal window
   void render();
 
-  /// Whether the slide has code to edit
-  bool hasCode() const { return !code.empty(); }
+  /// Whether the slide has a code block to edit
+  bool hasCode() const { return hasCodeBlock; }
 
   /// @brief  Let the user type in the code until Esc keeps the changes or
   /// Ctrl-X undoes them
@@ -60,14 +60,18 @@ private:
   /// The lines of the slide's code block as they show on screen, so they can
   /// be edited
   std::vector<std::string> code;
+  bool hasCodeBlock = false;
   size_t codeSourceStart = std::string::npos;
   size_t codeSourceEnd = std::string::npos;
   /// The screen row of the first code line, set when the code is drawn
   int codeRow = 0;
+  size_t codeViewportRow = 0;
+  size_t codeViewportColumn = 0;
   std::string language;
   bool isOutput = false;
 
   void addCode(const std::string &html);
+  void addReadOnlyCode(const std::string &html);
   void addOutput(const std::string &html);
   void drawCode();
 };
