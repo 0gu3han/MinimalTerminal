@@ -20,7 +20,7 @@ auto main(int argc, char *argv[]) -> int {
   }
 
   // Pass fstream to Presentation constructor
-  Presentation presentation(file);
+  Presentation presentation(file, fileName);
 
   // Close the filestream
   file.close();
