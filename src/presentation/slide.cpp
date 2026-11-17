@@ -234,7 +234,7 @@ bool Slide::edit() {
       render();
     }
     mvaddstr(getmaxy(stdscr) - 1, 0,
-             "-- INSERT --   Esc: keep changes   Ctrl-X: undo changes");
+             "-- INSERT --   Esc: keep changes   Ctrl-Z: undo changes");
     if (visibleRows && visibleColumns)
       move(codeRow + static_cast<int>(row - codeViewportRow),
            5 + static_cast<int>(column - codeViewportColumn));
@@ -246,7 +246,7 @@ bool Slide::edit() {
     case 27: // Esc
       curs_set(0);
       return true;
-    case 24: // Ctrl-X
+    case 26: // Ctrl-Z
       code = original;
       curs_set(0);
       return false;
