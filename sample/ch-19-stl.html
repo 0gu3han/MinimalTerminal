@@ -1,0 +1,880 @@
+<main>
+    <article>
+        <h1>Starting Out with C++: From Control Structures through Objects</h1>
+        <ul>
+            <li>Eleventh Edition</li>
+            <li><b>Chapter 19</b></li>
+            <li>The Standard Template Library</li>
+            <li>Copyright (c) 2027 Pearson Education, Inc. All Rights Reserved</li>
+        </ul>
+    </article>
+    <article>
+        <h1>19.1 Introduction to the Standard Template Library</h1>
+    </article>
+    <article>
+        <h1>Introduction to the Standard Template Library</h1>
+        <ul>
+            <li>The Standard Template Library (STL) contains templates organized into three main categories:</li>
+            <li><b>Containers:</b> Class templates for objects that store and organize data</li>
+            <li><b>Iterators:</b> Class templates for objects that behave like pointers, used to access individual data elements</li>
+            <li><b>Algorithms:</b> Function templates that perform various operations on container elements</li>
+            <li>The STL provides the foundation for most modern C++ applications, saving time and reducing bugs.</li>
+        </ul>
+    </article>
+    <article>
+        <h1>19.2 STL Container and Iterator Fundamentals</h1>
+    </article>
+    <article>
+        <h1>STL Container and Iterator Fundamentals</h1>
+        <ul>
+            <li>A <b>container</b> is an object that holds a collection of values or other objects</li>
+            <li>An <b>iterator</b> is used to access and traverse the elements</li>
+            <li><b>Sequence Containers:</b> Store data sequentially in memory (array, vector, deque, list, forward_list)</li>
+            <li><b>Associative Containers:</b> Store data for fast key-based lookup (map, multimap, set, multiset)</li>
+            <li style="color: yellow">Key Point: Containers must include appropriate header files (&lt;vector&gt;, &lt;map&gt;, &lt;set&gt;, etc.) and use the std namespace.</li>
+        </ul>
+    </article>
+    <article>
+        <h1>The array Class</h1>
+        <ul>
+            <li>A traditional C++ array enhanced with bounds-checking and useful member functions</li>
+            <li>Fixed size known at compile time</li>
+            <li>Defined in &lt;array&gt; header</li>
+            <li>Syntax: <b>array&lt;Type, Size&gt; arrayName;</b></li>
+            <li>Member functions: at(), front(), back(), size(), fill()</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;array&gt;
+using namespace std;
+
+int main() {
+    array&lt;int, 5&gt; numbers = {10, 20, 30, 40, 50};
+    cout &lt;&lt; numbers.at(0) &lt;&lt; endl;    // Safe access
+    numbers.fill(99);                 // Set all to 99
+    cout &lt;&lt; numbers.back() &lt;&lt; endl;
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Iterators: Uniform Container Access</h1>
+        <ul>
+            <li>Iterators provide a consistent way to access elements in any STL container, regardless of internal structure.</li>
+            <li><b>Forward:</b> Move forward only (++)</li>
+            <li><b>Bidirectional:</b> Move forward or backward (++, --)</li>
+            <li><b>Random Access:</b> Jump to any element</li>
+            <li><b>Input/Output:</b> Work with streams</li>
+            <li style="color: yellow">Think of iterators as bookmarks that can move through container elements!</li>
+        </ul>
+    </article>
+    <article>
+        <h1>Iterator Operations</h1>
+        <ul>
+            <li>Iterators work like pointers and support similar operations:</li>
+            <li><b>*</b> operator: Dereference to get element value</li>
+            <li><b>-&gt;</b> operator: Access object members</li>
+            <li><b>++</b> operator: Move to next element</li>
+            <li><b>--</b> operator: Move to previous element (bidirectional)</li>
+            <li><b>==</b> and <b>!=</b> operators: Compare iterators</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+int main() {
+    vector&lt;string&gt; names = {"Alice", "Elana", "Yuki"};
+    auto it = names.begin();
+    cout &lt;&lt; *it &lt;&lt; endl;     // Displays "Alice"
+    it++;                    // Move to next element
+    cout &lt;&lt; *it &lt;&lt; endl;     // Displays "Elana"
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>const_iterator</h1>
+        <ul>
+            <li>A const_iterator prevents modification of container elements while allowing traversal.</li>
+            <li>Use cbegin() and cend() member functions</li>
+            <li>Cannot modify elements through a const_iterator</li>
+            <li>Compiler enforces read-only access</li>
+            <li>Use auto keyword for cleaner code</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;array&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    array&lt;string, 3&gt; cities = {"Tokyo", "Paris", "Mumbai"};
+    for (auto it = cities.cbegin(); it != cities.cend(); it++)
+    {
+        cout &lt;&lt; *it &lt;&lt; endl;    // OK - reading
+        // *it = "NewCity";     // ERROR - cannot modify
+    }
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Reverse Iterators</h1>
+        <ul>
+            <li>Reverse iterators traverse containers from end to beginning.</li>
+            <li><b>rbegin():</b> Points to last element</li>
+            <li><b>rend():</b> Points before first element</li>
+            <li><b>crbegin()</b> and <b>crend():</b> const versions</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; numbers = {1, 2, 3, 4, 5};
+    // Display in reverse order
+    for (auto it = numbers.rbegin(); it != numbers.rend(); it++)
+    {
+        cout &lt;&lt; *it &lt;&lt; " "; // Displays: 5 4 3 2 1
+    }
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>19.3 The vector Class</h1>
+    </article>
+    <article>
+        <h1>The vector Class</h1>
+        <ul>
+            <li><b>Advantages over Traditional Arrays:</b></li>
+            <li>Automatically adjusts size as elements are added or removed</li>
+            <li>Provides bounds-checking with at() member function</li>
+            <li>Reports its own size with size() member function</li>
+            <li>Can be initialized with values or created empty</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; numbers = {1, 2, 3};
+    numbers.push_back(4);     // Add to end
+    cout &lt;&lt; numbers.size();   // Output: 4
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Key vector Member Functions</h1>
+        <ul>
+            <li><b>push_back(value):</b> Add element to end</li>
+            <li><b>pop_back():</b> Remove last element</li>
+            <li><b>insert(iterator, value):</b> Insert at specified position</li>
+            <li><b>erase(iterator):</b> Remove element at position</li>
+            <li><b>clear():</b> Remove all elements</li>
+            <li><b>empty():</b> Check if container is empty</li>
+            <li><b>emplace_back(args...):</b> Efficiently construct element in-place</li>
+            <li style="color: yellow">Note: Emplace functions are more efficient than insert/push_back for complex objects!</li>
+        </ul>
+    </article>
+    <article>
+        <h1>19.4 The Map Classes</h1>
+    </article>
+    <article>
+        <h1>The Map Classes</h1>
+        <ul>
+            <li>Each element in a map has two parts: a <b>key</b> and a <b>value</b>. Keys are used to locate specific values.</li>
+            <li>Think of a map like a dictionary: words (keys) mapped to definitions (values).</li>
+            <li><b>map:</b> Sorted, unique keys only</li>
+            <li><b>multimap:</b> Sorted, allows duplicate keys</li>
+            <li><b>unordered_map:</b> Fast lookup, not sorted</li>
+            <li><b>unordered_multimap:</b> Fast lookup, duplicate keys allowed</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    map&lt;int, string&gt; employees;
+    employees[101] = "Alice";
+    employees[102] = "Elana";
+    cout &lt;&lt; employees[102] &lt;&lt; endl;
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Accessing Map Elements</h1>
+        <ul>
+            <li>Maps provide multiple ways to access and modify elements:</li>
+            <li><b>[ ] operator:</b> Creates an element if the key doesn't exist</li>
+            <li><b>at() function:</b> Throws an exception if the key is not found</li>
+            <li><b>find() function:</b> Returns an iterator, or end() if not found</li>
+            <li><b>count() function:</b> Returns 0 or 1 (for map)</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    map&lt;int, string&gt; employees = {{101, "Alice"}, {102, "Elana"}};
+    // Access using []
+    cout &lt;&lt; employees[101] &lt;&lt; endl;    // "Alice"
+    // Check if key exists
+    if (employees.count(103) &gt; 0)
+        cout &lt;&lt; "Found!" &lt;&lt; endl;
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Iterating Through Maps</h1>
+        <ul>
+            <li>Map iterators provide access to both keys and values using first and second members.</li>
+            <li>Elements automatically sorted by key</li>
+            <li><b>it-&gt;first</b> accesses the key</li>
+            <li><b>it-&gt;second</b> accesses the value</li>
+            <li>Use auto for cleaner code</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    map&lt;int, string&gt; employees = {{101, "Alice"}, {102, "Elana"}};
+    for (auto it = employees.begin(); it != employees.end(); it++)
+    {
+        cout &lt;&lt; "ID: " &lt;&lt; it-&gt;first &lt;&lt; " Name: " &lt;&lt; it-&gt;second &lt;&lt; endl;
+    }
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Map insert() and erase() Functions</h1>
+        <ul>
+            <li>Adding and removing elements from maps:</li>
+            <li><b>insert():</b> Add key-value pairs</li>
+            <li><b>erase(key):</b> Remove element by key</li>
+            <li><b>erase(iterator):</b> Remove element at iterator position</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    map&lt;int, string&gt; employees;
+    // Insert elements
+    employees.insert({101, "Alice"});
+    employees.insert(make_pair(102, "Elana"));
+    employees[103] = "Yuki";                   // Alternative syntax
+    // Erase elements
+    employees.erase(102);                      // Remove by key
+    cout &lt;&lt; employees.size();                  // Output: 2
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>19.5 The Set Classes</h1>
+    </article>
+    <article>
+        <h1>The Set Classes</h1>
+        <ul>
+            <li>Sets store collections of unique values. They automatically prevent duplicates.</li>
+            <li><b>set:</b> Sorted, no duplicates</li>
+            <li><b>multiset:</b> Sorted, allows duplicates</li>
+            <li><b>unordered_set:</b> Fast operations, not sorted, no duplicates</li>
+            <li><b>unordered_multiset:</b> Fast operations, not sorted, allows duplicates</li>
+            <li>Key operations: <b>insert()</b> adds, <b>find()</b> locates, <b>erase()</b> removes elements</li>
+        </ul>
+    </article>
+    <article>
+        <h1>Set insert() and Duplicate Handling</h1>
+        <ul>
+            <li>Sets automatically reject duplicate values - attempting to insert duplicates is safe but has no effect.</li>
+            <li>Elements automatically sorted in ascending order</li>
+            <li>insert() returns pair&lt;iterator, bool&gt;</li>
+            <li>Second value is true if insertion succeeded, false if duplicate</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;set&gt;
+using namespace std;
+
+int main() {
+    set&lt;int&gt; numbers;
+    numbers.insert(10);
+    numbers.insert(20);
+    numbers.insert(10);     // Ignored - duplicate
+    // numbers now contains: {10, 20}
+    cout &lt;&lt; numbers.size(); // Output: 2
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Searching Sets: find() and contains()</h1>
+        <ul>
+            <li>Sets provide efficient searching for element membership:</li>
+            <li><b>find(value):</b> Returns iterator to element, or end() if not found</li>
+            <li><b>contains(value):</b> Returns true/false (C++20)</li>
+            <li><b>count(value):</b> Returns 0 or 1 for set, can be higher for multiset</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;set&gt;
+using namespace std;
+
+int main() {
+    set&lt;int&gt; numbers = {10, 20, 30, 40, 50};
+    // Using find()
+    auto it = numbers.find(30);
+    if (it != numbers.end())
+        cout &lt;&lt; "Found: " &lt;&lt; *it &lt;&lt; endl;
+    // Using contains() (C++20)
+    if (numbers.contains(30))
+        cout &lt;&lt; "30 is in the set" &lt;&lt; endl;
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Removing Elements from Sets</h1>
+        <ul>
+            <li>Sets provide multiple ways to remove elements:</li>
+            <li><b>erase(value):</b> Remove element by value</li>
+            <li><b>erase(iterator):</b> Remove element at iterator position</li>
+            <li><b>clear():</b> Remove all elements</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;set&gt;
+using namespace std;
+
+int main() {
+    set&lt;int&gt; numbers = {10, 20, 30, 40, 50};
+    // Remove by value
+    numbers.erase(30);
+    // Remove using iterator
+    auto it = numbers.find(40);
+    if (it != numbers.end())
+        numbers.erase(it);
+    cout &lt;&lt; numbers.size(); // Output: 3
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>19.6 The tuple Class</h1>
+    </article>
+    <article>
+        <h1>The tuple Class</h1>
+        <ul>
+            <li><b>CONCEPT:</b> A tuple is a container that can hold multiple values of different types.</li>
+            <li><b>Multiple Types:</b> Store different data types in a single object</li>
+            <li><b>&lt;tuple&gt; Header:</b> Must #include &lt;tuple&gt; to use tuples</li>
+            <li><b>Fixed Size:</b> Number of elements set at compile time</li>
+            <li><b>get&lt;N&gt;() Access:</b> Retrieve elements by index or type</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;tuple&gt;
+using namespace std;
+
+int main() {
+    tuple&lt;int, string, double&gt; student(101, "Alice", 3.85);
+    cout &lt;&lt; get&lt;0&gt;(student) &lt;&lt; endl;    // Displays 101
+    cout &lt;&lt; get&lt;1&gt;(student) &lt;&lt; endl;    // Displays Alice
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Creating Tuples</h1>
+        <ul>
+            <li>There are several ways to create a tuple in C++:</li>
+            <li><b>Using make_tuple</b>, <b>constructor initialization</b>, <b>auto with make_tuple</b>, and <b>braced initialization</b> (C++11)</li>
+            <li style="color: yellow">Tip: When using auto with make_tuple, the compiler automatically deduces the tuple's data types. This is often the simplest way to create a tuple.</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;tuple&gt;
+using namespace std;
+
+int main() {
+    // Using make_tuple
+    tuple&lt;int, string, double&gt; itemTuple;
+    itemTuple = make_tuple(123, "USB Cable", 8.99);
+    // Constructor initialization
+    tuple&lt;int, int, int&gt; nums(10, 20, 30);
+    // Using auto with make_tuple
+    auto gradeTuple = make_tuple(97, 'A');
+    // Braced initialization (C++11)
+    tuple&lt;string, int, double&gt; info{"Maria Lopez", 21, 3.85};
+    cout &lt;&lt; get&lt;0&gt;(info) &lt;&lt; endl;
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Retrieving Items by Index from a Tuple</h1>
+        <ul>
+            <li>Use the get function with an index inside angled brackets to retrieve a value. Indexes start at 0.</li>
+            <li><b>Index 0:</b> 123 (int)</li>
+            <li><b>Index 1:</b> "USB Cable" (string)</li>
+            <li><b>Index 2:</b> 8.99 (double)</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;tuple&gt;
+using namespace std;
+
+int main() {
+    tuple&lt;int, string, double&gt; itemTuple(123, "USB Cable", 8.99);
+    int itemNumber = get&lt;0&gt;(itemTuple);      // 123
+    string itemName = get&lt;1&gt;(itemTuple);     // "USB Cable"
+    double itemPrice = get&lt;2&gt;(itemTuple);    // 8.99
+    cout &lt;&lt; get&lt;1&gt;(itemTuple) &lt;&lt; endl;       // Displays: USB Cable
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Retrieving Items by Type</h1>
+        <ul>
+            <li>If all values in a tuple have different data types, you can retrieve values by specifying the type instead of the index.</li>
+            <li style="color: red"><b>Warning: Duplicate Types</b> - If more than one value has the same type, you cannot retrieve by type. Use the index instead.</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;tuple&gt;
+using namespace std;
+
+int main() {
+    tuple&lt;int, string, double&gt; itemTuple(123, "USB Cable", 8.99);
+    string itemName = get&lt;string&gt;(itemTuple);    // "USB Cable"
+    cout &lt;&lt; get&lt;double&gt;(itemTuple) &lt;&lt; endl;      // Displays: 8.99
+
+    tuple&lt;int, int, int, double&gt; nums(1, 2, 3, 4.5);
+    // cout &lt;&lt; get&lt;int&gt;(nums) &lt;&lt; endl;    // ERROR! Multiple ints
+    cout &lt;&lt; get&lt;double&gt;(nums) &lt;&lt; endl;    // OK: only one double
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Modifying the Contents of a Tuple</h1>
+        <ul>
+            <li>Once a tuple is created, its contents can be modified using the get function on the left side of an assignment operator.</li>
+            <li>You can modify by index or by type</li>
+            <li>You can assign one tuple to another if they have the same number and types of elements</li>
+            <li style="color: yellow">A compiler error will occur if the tuples do not have the same number of elements.</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;tuple&gt;
+using namespace std;
+
+int main() {
+    tuple&lt;int, int, int&gt; nums(1, 2, 3);
+    get&lt;2&gt;(nums) = 99;          // Modify by index
+    // nums now contains: 1, 2, 99
+    auto grade = make_tuple(90, 'A');
+    get&lt;char&gt;(grade) = 'B';     // Modify by type
+    // grade now contains: 90, 'B'
+    tuple&lt;int, int, int&gt; numbers2;
+    numbers2 = nums;            // numbers2 now holds: 1, 2, 99
+    cout &lt;&lt; get&lt;2&gt;(numbers2) &lt;&lt; " " &lt;&lt; get&lt;char&gt;(grade) &lt;&lt; endl;
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Swapping Tuples</h1>
+        <ul>
+            <li>The tuple class has a member function named swap that exchanges the contents of two tuples.</li>
+            <li><b>Before swap:</b> numbers1: 1, 2, 3 / numbers2: 4, 5, 6</li>
+            <li><b>After swap:</b> numbers1: 4, 5, 6 / numbers2: 1, 2, 3</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;tuple&gt;
+using namespace std;
+
+int main() {
+    tuple&lt;int, int, int&gt; numbers1(1, 2, 3);
+    tuple&lt;int, int, int&gt; numbers2(4, 5, 6);
+    numbers1.swap(numbers2);
+    cout &lt;&lt; get&lt;0&gt;(numbers1) &lt;&lt; " " &lt;&lt; get&lt;0&gt;(numbers2) &lt;&lt; endl;
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Unpacking a Tuple with tie()</h1>
+        <ul>
+            <li>The tie function unpacks a tuple and assigns its values to individual variables in a single statement.</li>
+            <li><b>Using ignore to Skip Values:</b> Pass ignore as an argument to skip values you don't need</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;tuple&gt;
+using namespace std;
+
+int main() {
+    tuple&lt;int, char&gt; gradeTuple(90, 'A');
+    int testScore;
+    char grade;
+    tie(testScore, grade) = gradeTuple;
+    // testScore is 90, grade is 'A'
+
+    tuple&lt;int, string, double&gt; itemTuple(123, "USB Cable", 8.99);
+    int itemNumber;
+    string itemName;
+    tie(itemNumber, itemName, ignore) = itemTuple;
+    // Extracts only the int and string; skips the double
+    cout &lt;&lt; itemNumber &lt;&lt; " " &lt;&lt; itemName &lt;&lt; endl;
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Structured Binding Declarations</h1>
+        <ul>
+            <li>Perhaps the simplest way to unpack a tuple is with a structured binding declaration (C++17). It defines variables and initializes them from the tuple in a single statement.</li>
+            <li>Works with tuples of different types</li>
+            <li style="color: yellow">Key Advantage: Structured bindings are shorter and cleaner than using tie() because you don't need to declare variables first.</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;tuple&gt;
+using namespace std;
+
+int main() {
+    tuple&lt;int, int, int&gt; numbers(1, 2, 3);
+    auto [num1, num2, num3] = numbers;
+    // num1 is 1, num2 is 2, num3 is 3
+
+    tuple&lt;string, int, double&gt; studentInfo{"Mateo", 20, 3.9};
+    auto [name, age, gpa] = studentInfo;
+    cout &lt;&lt; name &lt;&lt; " is " &lt;&lt; age &lt;&lt; " years old with a GPA of " &lt;&lt; gpa &lt;&lt; endl;
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Returning a Tuple from a Function</h1>
+        <ul>
+            <li>Tuples are very useful when you need to return multiple values from a function. Package the values with make_tuple and return them.</li>
+            <li>Call the function and unpack the result with a structured binding (simplest) or with tie</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;tuple&gt;
+using namespace std;
+
+tuple&lt;int, int, int&gt; getTestScores()
+{
+    int score1 = 0, score2 = 0, score3 = 0;
+    cout &lt;&lt; "Enter three test scores: ";
+    cin &gt;&gt; score1 &gt;&gt; score2 &gt;&gt; score3;
+    return make_tuple(score1, score2, score3);
+}
+
+int main() {
+    // Using structured binding (simplest)
+    auto [test1, test2, test3] = getTestScores();
+    // Using tie
+    int t1, t2, t3;
+    tie(t1, t2, t3) = getTestScores();
+    cout &lt;&lt; endl &lt;&lt; test1 &lt;&lt; " " &lt;&lt; t1 &lt;&lt; endl;
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Comparing Tuples</h1>
+        <ul>
+            <li>Tuples can be compared using the standard comparison operators (==, !=, &lt;, &lt;=, &gt;, &gt;=). Elements are compared from left to right.</li>
+            <li><b>Equality (==):</b> All corresponding elements must be equal for the tuples to be equal.</li>
+            <li><b>Other Comparisons (&lt;, &gt;, etc.):</b> Compared element by element from left to right until a difference is found.</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;tuple&gt;
+using namespace std;
+
+int main() {
+    tuple&lt;int, string&gt; student1(85, "Ahmed Hassan");
+    tuple&lt;int, string&gt; student2(90, "Lisa Chen");
+    tuple&lt;int, string&gt; student3(85, "Ahmed Hassan");
+    if (student1 == student3)
+        cout &lt;&lt; "student1 and student3 are equal." &lt;&lt; endl;
+    if (student2 &gt; student1)
+        cout &lt;&lt; "student2 is greater than student1." &lt;&lt; endl;
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Concatenating Tuples with tuple_cat</h1>
+        <ul>
+            <li>The tuple_cat function combines multiple tuples into a single tuple, preserving the order of all elements.</li>
+            <li><b>first</b> (99, "Hello") + <b>second</b> (3.14, 'A') = <b>combined</b> (99, "Hello", 3.14, 'A')</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;tuple&gt;
+using namespace std;
+
+int main() {
+    tuple&lt;int, string&gt; first(99, "Hello");
+    tuple&lt;double, char&gt; second(3.14, 'A');
+    auto combined = tuple_cat(first, second);
+    // combined type: tuple&lt;int, string, double, char&gt;
+    // combined holds: 99, "Hello", 3.14, 'A'
+    cout &lt;&lt; get&lt;1&gt;(combined) &lt;&lt; " " &lt;&lt; get&lt;3&gt;(combined) &lt;&lt; endl;
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>19.7 Algorithms</h1>
+    </article>
+    <article>
+        <h1>Algorithms</h1>
+        <ul>
+            <li>STL algorithms are function templates that perform common operations on containers.</li>
+            <li><b>Min/max algorithms:</b> Find smallest and largest values</li>
+            <li><b>Sorting algorithms:</b> Sort or check if sorted</li>
+            <li><b>Search algorithms:</b> Search sorted ranges</li>
+            <li><b>Read-only algorithms:</b> Iterate without modifying</li>
+            <li><b>Modifying algorithms:</b> Copy, move, transform elements</li>
+            <li style="color: yellow">Most algorithms require the &lt;algorithm&gt; header file.</li>
+        </ul>
+    </article>
+    <article>
+        <h1>Common STL Algorithms</h1>
+        <ul>
+            <li><b>sort():</b> Sort elements in ascending order</li>
+            <li><b>find():</b> Search for a value</li>
+            <li><b>count():</b> Count occurrences of a value</li>
+            <li><b>reverse():</b> Reverse order of elements</li>
+            <li><b>min_element(), max_element():</b> Find min/max</li>
+            <li><b>binary_search():</b> Check if sorted range contains value</li>
+            <li><b>for_each():</b> Apply function to each element</li>
+            <li><b>transform():</b> Apply function and store results</li>
+        </ul>
+    </article>
+    <article>
+        <h1>min_element() and max_element()</h1>
+        <ul>
+            <li>These algorithms find the smallest and largest elements in a range:</li>
+            <li>Return iterators pointing to the minimum or maximum element</li>
+            <li>Must dereference the iterator to get the value</li>
+            <li>minmax_element() returns both min and max as a pair</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; values = {45, 46, 2, 47, 48, 999, 49, 50};
+    // Find min and max
+    auto min = min_element(values.begin(), values.end());
+    auto max = max_element(values.begin(), values.end());
+    cout &lt;&lt; "Minimum: " &lt;&lt; *min &lt;&lt; endl;  // 2
+    cout &lt;&lt; "Maximum: " &lt;&lt; *max &lt;&lt; endl;  // 999
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>sort() and binary_search()</h1>
+        <ul>
+            <li>Sorting and searching are fundamental STL algorithms:</li>
+            <li><b>sort():</b> Sorts elements in ascending order (default)</li>
+            <li><b>binary_search():</b> Efficiently searches sorted ranges</li>
+            <li>Returns true if value found, false otherwise</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; numbers = {50, 10, 40, 20, 30};
+    // Sort the vector
+    sort(numbers.begin(), numbers.end());
+    // numbers is now: {10, 20, 30, 40, 50}
+    // Binary search (only works on sorted ranges)
+    if (binary_search(numbers.begin(), numbers.end(), 30))
+        cout &lt;&lt; "Found 30!" &lt;&lt; endl;
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>find() and count()</h1>
+        <ul>
+            <li>Search algorithms for locating values in containers:</li>
+            <li><b>find():</b> Returns iterator to first occurrence, or end() if not found</li>
+            <li><b>count():</b> Returns number of occurrences of a value</li>
+            <li>Work on unsorted ranges (unlike binary_search)</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; numbers = {10, 20, 30, 20, 40};
+    // Find first occurrence of 20
+    auto it = find(numbers.begin(), numbers.end(), 20);
+    if (it != numbers.end())
+        cout &lt;&lt; "Item Found\n";
+    // Count occurrences
+    int occurrences = count(numbers.begin(), numbers.end(), 20);
+    cout &lt;&lt; "Found " &lt;&lt; occurrences &lt;&lt; " times"; // 2
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>remove() and reverse()</h1>
+        <ul>
+            <li>Modifying algorithms that rearrange container elements:</li>
+            <li><b>remove():</b> Moves unwanted elements to end, doesn't delete them</li>
+            <li>Must call erase() to actually delete</li>
+            <li><b>reverse():</b> Reverses the order of elements in a range</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; numbers = {1, 7, 3, 7, 4, 7, 5};
+    // Remove all 7s (erase-remove idiom)
+    auto newEnd = remove(numbers.begin(), numbers.end(), 7);
+    numbers.erase(newEnd, numbers.end());
+    // numbers is now: {1, 3, 4, 5}
+    reverse(numbers.begin(), numbers.end());
+    // numbers is now: {5, 4, 3, 1}
+    for (int n : numbers)
+        cout &lt;&lt; n &lt;&lt; " ";
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>19.8 Passing Functions to Algorithms</h1>
+    </article>
+    <article>
+        <h1>Passing Functions to Algorithms</h1>
+        <ul>
+            <li>Many STL algorithms can accept functions to customize their behavior.</li>
+            <li><b>Function Pointers:</b> Pass regular function names</li>
+            <li><b>Function Objects (Functors):</b> Objects that act like functions (covered in Chapter 20)</li>
+            <li><b>Lambda Expressions:</b> Anonymous inline functions (covered in Chapter 20)</li>
+        </ul>
+    </article>
+    <article>
+        <h1>for_each() with Function Pointers</h1>
+        <ul>
+            <li>The for_each algorithm applies a function to each element in a range</li>
+            <li>displayAndDouble is passed as a <b>function pointer</b></li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+// Function to display and modify each element
+void displayAndDouble(int&amp; num)
+{
+    cout &lt;&lt; "Before: " &lt;&lt; num &lt;&lt; ", ";
+    num *= 2;
+    cout &lt;&lt; "After: " &lt;&lt; num &lt;&lt; endl;
+}
+
+int main() {
+    vector&lt;int&gt; numbers = {1, 2, 3, 4, 5};
+    // Apply function to each element
+    for_each(numbers.begin(), numbers.end(), displayAndDouble);
+    // numbers is now: {2, 4, 6, 8, 10}
+    return 0;
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Using Predicates with Algorithms</h1>
+        <ul>
+            <li>Predicates are functions that return bool values, used with many algorithms</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+// Predicate function - returns true if even
+bool isEven(int num)
+{
+    return num % 2 == 0;
+}
+
+int main() {
+    vector&lt;int&gt; numbers = {1, 2, 3, 4, 5, 6, 7, 8};
+    // Count even numbers
+    int evenCount = count_if(numbers.begin(), numbers.end(), isEven);
+    cout &lt;&lt; "Even numbers: " &lt;&lt; evenCount &lt;&lt; endl; // Output: 4
+    // Find first even number
+    auto it = find_if(numbers.begin(), numbers.end(), isEven);
+    cout &lt;&lt; "First even: " &lt;&lt; *it &lt;&lt; endl; // Output: 2
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>transform() with Function Pointers</h1>
+        <ul>
+            <li>The transform algorithm applies a function to each element and stores results</li>
+        </ul>
+        <pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+// Function to square a number
+int square(int num)
+{
+    return num * num;
+}
+
+int main() {
+    vector&lt;int&gt; numbers = {1, 2, 3, 4, 5};
+    vector&lt;int&gt; results(5);  // Destination vector
+    // Transform each element and store in results
+    transform(numbers.begin(), numbers.end(), results.begin(), square);
+    // results is now: {1, 4, 9, 16, 25}
+    for (int n : results)
+        cout &lt;&lt; n &lt;&lt; " ";
+    return 0;
+}
+        </code></pre>
+    </article>
+    <article>
+        <h1>Copyright</h1>
+        <ul>
+            <li>This work is protected by United States copyright laws and is provided solely for the use of instructors in teaching their courses and assessing student learning. Dissemination or sale of any part of this work (including on the World Wide Web) will destroy the integrity of the work and is not permitted. The work and materials from it should never be made available to students except by instructors using the accompanying text in their classes. All recipients of this work are expected to abide by these restrictions and to honor the intended pedagogical purposes and the needs of other instructors who rely on these materials.</li>
+        </ul>
+    </article>
+    <article>
+        <h1>AI Statement</h1>
+        <ul>
+            <li>Pearson uses AI, including to support the creation of content. We claim copyright to the fullest extent permissible by law.</li>
+        </ul>
+    </article>
+</main>
