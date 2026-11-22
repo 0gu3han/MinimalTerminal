@@ -38,6 +38,13 @@ static std::string trim(const std::string &text) {
   return text.substr(first, last - first + 1);
 }
 
+static int textWidth(std::string html) {
+  size_t tag;
+  while ((tag = html.find('<')) != std::string::npos)
+    html.erase(tag, html.find('>', tag) - tag + 1);
+  return decodeEntities(html).size();
+}
+
 static std::vector<std::string> codeLines(const std::string &html) {
   std::string text = decodeEntities(html);
   const bool startsWithBoundary = !text.empty() && text.front() == '\n';
@@ -133,10 +140,13 @@ Slide::Slide(const std::string &html, size_t sourceStart) {
   for (const Element &element :
        findAll(html, {"h1", "li", "code", "output"})) {
     const std::string &tag = element.openingTag;
+    const bool centered = tag.contains(" center");
     if (tag.starts_with("<h1"))
-      lines.push_back({trim(element.content), A_BOLD | colorOf(tag), 0});
+      lines.push_back(
+          {trim(element.content), A_BOLD | colorOf(tag), 0, centered});
     else if (tag.starts_with("<li"))
-      lines.push_back({"* " + trim(element.content), colorOf(tag), 8});
+      lines.push_back(
+          {"* " + trim(element.content), colorOf(tag), 8, centered});
     else if (tag.starts_with("<output"))
       addOutput(element.content);
     else if (!foundCode) {
@@ -176,7 +186,12 @@ void Slide::render() {
       }
       continue;
     }
-    move(getcury(stdscr) + 1, line.column);
+    // a line wider than the screen starts at the left edge
+    const int column =
+        line.centered
+            ? std::max(0, (getmaxx(stdscr) - textWidth(line.text)) / 2)
+            : line.column;
+    move(getcury(stdscr) + 1, column);
     drawStyled(line.text, line.style);
   }
 }

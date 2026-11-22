@@ -22,6 +22,7 @@ struct Line {
   std::string text;
   attr_t style;
   int column;
+  bool centered = false;
 };
 
 export class Slide {
