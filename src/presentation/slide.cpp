@@ -140,7 +140,7 @@ Slide::Slide(const std::string &html, size_t sourceStart) {
   for (const Element &element :
        findAll(html, {"h1", "li", "code", "output"})) {
     const std::string &tag = element.openingTag;
-    const bool centered = tag.contains(" center");
+    const bool centered = tag.contains("text-align: center");
     if (tag.starts_with("<h1"))
       lines.push_back(
           {trim(element.content), A_BOLD | colorOf(tag), 0, centered});
