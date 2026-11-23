@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chapter 19</title>
+</head>
+
+<body>
+    <main>
+        <article>
+            <h1>Chapter 19</h1>
+            <p>The standard template library.</p>
+        </article>
+        <article>
+            <h2>19.1 Introduction to the Standard Template Library</h2>
+        </article>
+        <article>
+            <h3>Introduction to the Standard Template Library</h3>
+            <p>The Standard Template Library (<abbr>STL</abbr>) contains templates
+                organized into three main categories:</p>
+            <dl>
+                <dt>Containers</dt>
+                <dd>Class templates for objects that store and organize data</dd>
+                <dt>Iterators</dt>
+                <dd>Class templates for objects that behave like pointers, used to access individual data elements</dd>
+                <dt>Algorithms</dt>
+                <dd>Function templates that perform various operations on container elements</dd>
+            </dl>
+        </article>
+        <article>
+            <h2>19.2 <abbr>STL</abbr> Container and Iterator Fundamentals</h2>
+        </article>
+        <article>
+            <h3><abbr>STL</abbr> Container and Iterator Fundamentals</h3>
+            <ul>
+                <li>A container is an object that holds a collection of values or other objects</li>
+                <li>An iterator is used to access and traverse the elements.</li>
+            </ul>
+            <h4>Understanding Containers</h4>
+            <dl>
+                <dt>Sequence Containers</dt>
+                <dd>Store data sequentially in memory (<code>array</code>, <code>vector</code>, <code>deque</code>,
+                    <code>list</code>, <code>forward_list</code>)
+                </dd>
+                <dt>Associative Containers</dt>
+                <dd>Store data for fast key-based lookup (<code>map</code>, <code>multimap</code>, <code>set</code>,
+                    <code>multiset</code>)
+                </dd>
+            </dl>
+            <p><b>Key Point:</b> Containers must include appropriate header files (<code>&lt;vector&gt;</code>,
+                <code>&lt;map&gt;</code>, <code>&lt;set&gt;</code>, etc.) and use the <code>std</code> namespace.
+            </p>
+        </article>
+        <article>
+            <h3>The <code>array</code> Class</h3>
+            <p>A traditional C++ array enhanced with bounds-checking and useful member functions.</p>
+            <h4>Key Features</h4>
+            <ul>
+                <li>Fixed size known at compile time</li>
+                <li>Defined in <code>&lt;array&gt;</code> header</li>
+                <li>Syntax: <code>array&lt;Type, Size&gt; arrayName;</code></li>
+                <li>Member functions: <code>at()</code>, <code>front()</code>, <code>back()</code>, <code>size()</code>,
+                    <code>fill()</code>
+                </li>
+            </ul>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>array&lt;int, 5&gt; numbers = {10, 20, 30, 40, 50};
+cout << numbers.at(0) << endl;    // Safe access
+numbers.fill(99);                 // Set all to 99</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Iterators: Uniform Container Access</h3>
+            <p>Iterators provide a consistent way to access elements in any <abbr>STL</abbr> container, regardless of
+                internal structure.</p>
+            <h4>Iterator Categories</h4>
+            <dl>
+                <dt>Forward</dt>
+                <dd>Move forward only (<code>++</code>)</dd>
+                <dt>Bidirectional</dt>
+                <dd>Move forward or backward (<code>++</code>, <code>--</code>)</dd>
+                <dt>Random Access</dt>
+                <dd>Jump to any element</dd>
+                <dt>Input/Output</dt>
+                <dd>Work with streams</dd>
+            </dl>
+            <p>Think of iterators as bookmarks that can move through container elements!</p>
+        </article>
+        <article>
+            <h3>Iterator Operations</h3>
+            <p>Iterators work like pointers and support similar operations:</p>
+            <dl>
+                <dt><code>*</code> operator</dt>
+                <dd>Dereference to get element value</dd>
+                <dt><code>-></code> operator</dt>
+                <dd>Access object members</dd>
+                <dt><code>++</code> operator</dt>
+                <dd>Move to next element</dd>
+                <dt><code>--</code> operator</dt>
+                <dd>Move to previous element (bidirectional)</dd>
+                <dt><code>==</code> operator</dt>
+                <dt><code>!=</code> operator</dt>
+                <dd>Compare iterators</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>vector&lt;string&gt; names = {"Alice", "Elana", "Yuki"};
+auto it = names.begin();
+cout << *it;             // Displays "Alice"
+it++;                    // Move to next element</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3><code>const_iterator</code></h3>
+            <p>A <code>const_iterator</code> prevents modification of container elements while allowing traversal.</p>
+            <h4>Key Features</h4>
+            <ul>
+                <li>Use <code>cbegin()</code> and <code>cend()</code> member functions</li>
+                <li>Cannot modify elements through a <code>const_iterator</code></li>
+                <li>Compiler enforces read-only access</li>
+                <li>Use <code>const</code> keyword for cleaner code</li>
+            </ul>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>array&lt;string, 3&gt; cities = {"Tokyo", "Paris", "Mumbai"};
+for (auto it = cities.cbegin(); it != cities.cend(); it++)
+{
+    cout << *it << endl;    // OK - reading
+    // *it = "NewCity";     // ERROR - cannot modify
+}</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Reverse Iterators</h3>
+            <p>Reverse iterators traverse containers from end to beginning.</p>
+            <h4>Member Functions</h4>
+            <dl>
+                <dt><code>rbegin()</code></dt>
+                <dd>Points to last element</dd>
+                <dt><code>rend()</code></dt>
+                <dd>Points before first element</dd>
+                <dt><code>crbegin()</code></dt>
+                <dt><code>crend()</code></dt>
+                <dd>const versions</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>vector&lt;int&gt; numbers = {1, 2, 3, 4, 5};
+// Display in reverse order
+for (auto it = numbers.rbegin(); it != numbers.rend(); it++)
+{
+    cout << *it << " "; // Displays: 5 4 3 2 1
+}</code></pre>
+            </div>
+        </article>
+        <article>
+            <h2>19.3 The <code>vector</code> Class</h2>
+        </article>
+        <article>
+            <h3>The <code>vector</code> Class</h3>
+            <h4>Advantages over Traditional Arrays</h4>
+            <ul>
+                <li>Automatically adjusts size as elements are added or removed</li>
+                <li>Provides bounds-checking with <code>at()</code> member function</li>
+                <li>Reports its own size with <code>size()</code> member function</li>
+                <li>Can be initialized with values or created empty</li>
+            </ul>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>vector&lt;int&gt; numbers = {1, 2, 3};
+numbers.push_back(4);     // Add to end
+cout << numbers.size();   // Output: 4</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Key <code>vector</code> Member Functions</h3>
+            <dl>
+                <dt><code>push_back(<var>value</var>)</code></dt>
+                <dd>Add element to end</dd>
+                <dt><code>pop_back()</code></dt>
+                <dd>Remove last element</dd>
+                <dt><code>insert(<var>iterator</var>, <var>value</var>)</code></dt>
+                <dd>Insert at specified position</dd>
+                <dt><code>erase(<var>iterator</var>)</code></dt>
+                <dd>Remove element at position</dd>
+                <dt><code>clear()</code></dt>
+                <dd>Remove all elements</dd>
+                <dt><code>empty()</code></dt>
+                <dd>Check if container is empty</dd>
+                <dt><code>emplace_back(<var>args...</var>)</code></dt>
+                <dd>Efficiently construct element in-place</dd>
+            </dl>
+            <p>Note: Emplace functions are more efficient than <code>insert</code>/<code>push_back</code> for complex
+                objects!</p>
+        </article>
+        <article>
+            <h2>19.4 The Map Classes</h2>
+        </article>
+        <article>
+            <h3>The Map Classes</h3>
+            <ul>
+                <li>Each element in a map has two parts: a <b>key</b> and a <b>value</b></li>
+                <li>Keys are used to locate specific values</li>
+            </ul>
+            <p>Think of a map like a dictionary: words (keys) mapped to definitions (values).</p>
+            <h4>Map Types</h4>
+            <dl>
+                <dt><code>map</code></dt>
+                <dd>Sorted, unique keys only</dd>
+                <dt><code>multimap</code></dt>
+                <dd>Sorted, allows duplicate keys</dd>
+                <dt><code>unordered_map</code></dt>
+                <dd>Fast lookup, not sorted</dd>
+                <dt><code>unordered_multimap</code></dt>
+                <dd>Fast lookup, duplicate keys allowed</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>map&lt;int, string&gt; employees;
+employees[101] = "Alice";
+employees[102] = "Elana";</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Accessing Map Elements</h3>
+            <p>Maps provide multiple ways to access and modify elements:</p>
+            <dl>
+                <dt><code>[]</code> operator</dt>
+                <dd>Creates an element if the key doesn't exist</dd>
+                <dt><code>at()</code> function</dt>
+                <dd>Throws an exception if the key is not found</dd>
+                <dt><code>find()</code> function</dt>
+                <dd>Returns an iterator, or <code>end()</code> if not found</dd>
+                <dt><code>count()</code> function</dt>
+                <dd>Returns 0 or 1 (for map)</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>map&lt;int, string&gt; employees = {{101, "Alice"}, {102, "Elana"}};
+
+// Access using []
+cout << employees[101];      // "Alice"
+
+// Check if key exists
+if (employees.count(103) > 0)
+    cout << "Found!" << endl;</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Iterating Through Maps</h3>
+            <p>Map iterators provide access to both keys and values using <code>first</code> and <code>second</code>
+                members.</p>
+            <h4>Key Points</h4>
+            <ul>
+                <li>Elements automatically sorted by key</li>
+                <li><code>it->first</code> accesses the key</li>
+                <li><code>it->second</code> accesses the value</li>
+                <li>Use <code>auto</code> for cleaner code</li>
+            </ul>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>map&lt;int, string&gt; employees = {{101, "Alice"}, {102, "Elana"}};
+
+for (auto it = employees.begin(); it != employees.end(); it++)
+{
+    cout << "ID: " << it->first << " Name: " << it->second << endl;
+}</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Map <code>insert()</code> and <code>erase()</code> Functions</h3>
+            <p>Adding and removing elements from maps:</p>
+            <dl>
+                <dt><code>insert()</code></dt>
+                <dd>Add key-value pairs</dd>
+                <dt><code>erase(<var>key</var>)</code></dt>
+                <dd>Remove element by key</dd>
+                <dt><code>erase(<var>iterator</var>)</code></dt>
+                <dd>Remove element at iterator position</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>map&lt;int, string&gt; employees;
+// Insert elements
+employees.insert({101, "Alice"});
+employees.insert(make_pair(102, "Elana"));
+employees[103] = "Yuki";                   // Alternative syntax
+// Erase elements
+employees.erase(102);                      // Remove by key
+cout << employees.size();                  // Output: 2</code></pre>
+            </div>
+        </article>
+        <article>
+            <h2>19.5 The Set Classes</h2>
+        </article>
+        <article>
+            <h3>The Set Classes</h3>
+            <ul>
+                <li>Sets store collections of unique values</li>
+                <li>They automatically prevent duplicates</li>
+            </ul>
+            <h4>Set Types</h4>
+            <dl>
+                <dt><code>set</code></dt>
+                <dd>Sorted, no duplicates</dd>
+                <dt><code>multiset</code></dt>
+                <dd>Sorted, allows duplicates</dd>
+                <dt><code>unordered_set</code></dt>
+                <dd>Fast operations, not sorted, no duplicates</dd>
+                <dt><code>unordered_multiset</code></dt>
+                <dd>Fast operations, not sorted, allows duplicates</dd>
+            </dl>
+            <h4>Key Operations</h4>
+            <dl>
+                <dt><code>insert()</code></dt>
+                <dd>Add elements</dd>
+                <dt><code>find()</code></dt>
+                <dd>Locate elements</dd>
+                <dt><code>erase()</code></dt>
+                <dd>Remove elements</dd>
+            </dl>
+        </article>
+        <article>
+            <h3>Set <code>insert()</code> and Duplicate Handling</h3>
+            <p>Sets automatically reject duplicate values - attempting to insert duplicates is safe but has no effect.
+            </p>
+            <h4>Key Characteristics</h4>
+            <ul>
+                <li>Elements automatically sorted in ascending order</li>
+                <li><code>insert()</code> returns <code>pair&lt;iterator, bool&gt;</code></li>
+                <li>Second value is <code>true</code> if insertion succeeded, <code>false</code> if duplicate</li>
+            </ul>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>set&lt;int&gt; numbers;
+numbers.insert(10);
+numbers.insert(20);
+numbers.insert(10);     // Ignored - duplicate
+
+// numbers now contains: {10, 20}
+cout << numbers.size(); // Output: 2</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Searching Sets: <code>find()</code> and <code>contains()</code></h3>
+            <p>Sets provide efficient searching for element membership:</p>
+            <dl>
+                <dt><code>find(<var>value</var>)</code></dt>
+                <dd>Returns iterator to element, or <code>end()</code> if not found</dd>
+                <dt><code>contains(<var>value</var>)</code></dt>
+                <dd>Returns <code>true</code>/<code>false</code> <small>(C++20)</small></dd>
+                <dt><code>count(<var>value</var>)</code></dt>
+                <dd>Returns 0 or 1 for <code>set</code>, can be higher for <code>multiset</code></dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>set&lt;int&gt; numbers = {10, 20, 30, 40, 50};
+
+// Using find()
+auto it = numbers.find(30);
+if (it != numbers.end())
+    cout << "Found: " << *it << endl;
+
+// Using contains() (C++20)
+if (numbers.contains(30))
+    cout << "30 is in the set" << endl;</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Removing Elements from Sets</h3>
+            <p>Sets provide multiple ways to remove elements:</p>
+            <dl>
+                <dt><code>erase(<var>value</var>)</code></dt>
+                <dd>Remove element by value</dd>
+                <dt><code>erase(<var>iterator</var>)</code></dt>
+                <dd>Remove element at iterator position</dd>
+                <dt><code>clear()</code></dt>
+                <dd>Remove all elements</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>set&lt;int&gt; numbers = {10, 20, 30, 40, 50};
+
+// Remove by value
+numbers.erase(30);
+
+// Remove using iterator
+auto it = numbers.find(40);
+if (it != numbers.end())
+    numbers.erase(it);
+
+cout << numbers.size(); // Output: 3</code></pre>
+            </div>
+        </article>
+    </main>
+</body>
+
+</html>
