@@ -705,6 +705,227 @@ auto combined = tuple_cat(first, second);
                 </tbody>
             </table>
         </article>
+        <article>
+            <h2>19.7 Algorithms</h2>
+        </article>
+        <article>
+            <h3>Algorithms</h3>
+            <p><abbr>STL</abbr> algorithms are function templates that perform common operations on containers.</p>
+            <h4>Algorithm Categories</h4>
+            <dl>
+                <dt>Min/max algorithms</dt>
+                <dd>Find smallest and largest values</dd>
+                <dt>Sorting algorithms</dt>
+                <dd>Sort or check if sorted</dd>
+                <dt>Search algorithms</dt>
+                <dd>Search sorted ranges</dd>
+                <dt>Read-only algorithms</dt>
+                <dd>Iterate without modifying</dd>
+                <dt>Modifying algorithms</dt>
+                <dd>Copy, move, transform elements</dd>
+            </dl>
+            <p>Most algorithms require the <code>&lt;algorithm&gt;</code> header file.</p>
+        </article>
+        <article>
+            <h3>Common <abbr>STL</abbr> Algorithms</h3>
+            <dl>
+                <dt><code>sort()</code></dt>
+                <dd>Sort elements in ascending order</dd>
+                <dt><code>find()</code></dt>
+                <dd>Search for a value</dd>
+                <dt><code>count()</code></dt>
+                <dd>Count occurrences of a value</dd>
+                <dt><code>reverse()</code></dt>
+                <dd>Reverse order of elements</dd>
+                <dt><code>min_element()</code></dt>
+                <dt><code>max_element()</code></dt>
+                <dd>Find min/max</dd>
+                <dt><code>binary_search()</code></dt>
+                <dd>Check if sorted range contains value</dd>
+                <dt><code>for_each()</code></dt>
+                <dd>Apply function to each element</dd>
+                <dt><code>transform()</code></dt>
+                <dd>Apply function and store results</dd>
+            </dl>
+        </article>
+        <article>
+            <h3><code>min_element()</code> and <code>max_element()</code></h3>
+            <p>These algorithms find the smallest and largest elements in a range:</p>
+            <ul>
+                <li>Return iterators pointing to the minimum or maximum element</li>
+                <li>Must dereference the iterator to get the value</li>
+                <li><code>minmax_element()</code> returns both min and max as a pair</li>
+            </ul>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>vector&lt;int&gt; values = {45, 46, 2, 47, 48, 999, 49, 50};
+
+// Find min and max
+auto min = min_element(values.begin(), values.end());
+auto max = max_element(values.begin(), values.end());
+
+cout << "Minimum: " << *min << endl;  // 2
+cout << "Maximum: " << *max << endl;  // 999</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3><code>sort()</code> and <code>binary_search()</code></h3>
+            <p>Sorting and searching are fundamental <abbr>STL</abbr> algorithms:</p>
+            <dl>
+                <dt><code>sort()</code></dt>
+                <dd>Sorts elements in ascending order (default)</dd>
+                <dt><code>binary_search()</code></dt>
+                <dd>Efficiently searches sorted ranges</dd>
+                <dd>Returns <code>true</code> if value found, <code>false</code> otherwise</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>vector&lt;int&gt; numbers = {50, 10, 40, 20, 30};
+
+// Sort the vector
+sort(numbers.begin(), numbers.end());
+// numbers is now: {10, 20, 30, 40, 50}
+
+// Binary search (only works on sorted ranges)
+if (binary_search(numbers.begin(), numbers.end(), 30))
+    cout << "Found 30!" << endl;</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3><code>find()</code> and <code>count()</code></h3>
+            <p>Search algorithms for locating values in containers:</p>
+            <dl>
+                <dt><code>find()</code></dt>
+                <dd>Returns iterator to first occurrence, or end() if not found</dd>
+                <dt><code>count()</code></dt>
+                <dd>Returns number of occurrences of a value</dd>
+                <dd>Work on unsorted ranges (unlike <code>binary_search</code>)</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>vector&lt;int&gt; numbers = {10, 20, 30, 20, 40};
+
+// Find first occurrence of 20
+auto it = find(numbers.begin(), numbers.end(), 20);
+if (it != numbers.end())
+    cout << "Item Found\n";
+
+// Count occurrences
+int occurrences = count(numbers.begin(), numbers.end(), 20);
+cout << "Found " << occurrences << " times"; // 2</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3><code>remove()</code> and <code>reverse()</code></h3>
+            <p>Modifying algorithms that rearrange container elements:</p>
+            <dl>
+                <dt><code>remove()</code></dt>
+                <dd>Moves unwanted elements to end, doesn't delete them</dd>
+                <dd>Must call <code>erase()</code> to actually delete</dd>
+                <dt><code>reverse()</code></dt>
+                <dd>Reverses the order of elements in a range</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>vector&lt;int&gt; numbers = {1, 7, 3, 7, 4, 7, 5};
+
+// Remove all 7s (erase-remove idiom)
+auto newEnd = remove(numbers.begin(), numbers.end(), 7);
+numbers.erase(newEnd, numbers.end());
+// numbers is now: {1, 3, 4, 5}
+
+reverse(numbers.begin(), numbers.end());
+// numbers is now: {5, 4, 3, 1}</code></pre>
+            </div>
+        </article>
+        <article>
+            <h2>19.8 Passing Functions to Algorithms</h2>
+        </article>
+        <article>
+            <h3>Passing Functions to Algorithms</h3>
+            <p>Many <abbr>STL</abbr> algorithms can accept functions to customize their behavior.</p>
+            <h4>Three Ways to Pass Functions</h4>
+            <dl>
+                <dt>Function Pointers</dt>
+                <dd>Pass regular function names</dd>
+                <dt>Function Objects (Functors)</dt>
+                <dd>Objects that act like functions (covered in Chapter 20)</dd>
+                <dt>Lambda Expressions</dt>
+                <dd>Anonymous inline functions (covered in Chapter 20)</dd>
+            </dl>
+        </article>
+        <article>
+            <h3><code>for_each()</code> with Function Pointers</h3>
+            <p>The <code>for_each</code> algorithm applies a function to each element in a range:</p>
+            <!-- I've omitted bolded text and an arrow here -->
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>// Function to display and modify each element
+void displayAndDouble(int& num)
+{
+    cout << "Before: " << num << ", ";
+    num *= 2;
+    cout << "After: " << num << endl;
+}
+
+int main()
+{
+    vector&lt;int&gt; numbers = {1, 2, 3, 4, 5};
+    
+    // Apply function to each element
+    for_each(numbers.begin(), numbers.end(), displayAndDouble);
+    
+    // numbers is now: {2, 4, 6, 8, 10}
+    return 0;
+}</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Using Predicates with Algorithms</h3>
+            <p>Predicates are functions that return <code>bool</code> values, used with many algorithms:</p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>// Predicate function - returns true if even
+bool isEven(int num)
+{
+    return num % 2 == 0;
+}
+
+vector&lt;int&gt; numbers = {1, 2, 3, 4, 5, 6, 7, 8};
+
+// Count even numbers
+int evenCount = count_if(numbers.begin(), numbers.end(), isEven);
+cout << "Even numbers: " << evenCount << endl; // Output: 4
+
+// Find first even number
+auto it = find_if(numbers.begin(), numbers.end(), isEven);
+cout << "First even: " << *it << endl; // Output: 2</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3><code>transform()</code> with Function Pointers</h3>
+            <p>The transform algorithm applies a function to each element and stores results:</p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>// Function to square a number
+int square(int num)
+{
+    return num * num;
+}
+
+int main()
+{
+    vector&lt;int&gt; numbers = {1, 2, 3, 4, 5};
+    vector&lt;int&gt; results(5);  // Destination vector
+    
+    // Transform each element and store in results
+    transform(numbers.begin(), numbers.end(), results.begin(), square);
+    
+    // results is now: {1, 4, 9, 16, 25}
+    return 0;
+}</code></pre>
+            </div>
+        </article>
     </main>
 </body>
 
