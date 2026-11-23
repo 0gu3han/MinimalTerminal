@@ -49,9 +49,6 @@ A slide picks its layout with `class` on the `<article>`:
 Everything is fitted to the terminal and laid out again when it is resized. Long bullets wrap, code lines that are too
 wide end with `…`, and `...` shows that a slide has more than fits.
 
-An `<h1>` or `<li>` with `style="text-align: center"` is centered, the same CSS a browser uses. Dynodeck keeps a centered
-bullet's marker next to its text, so put `style="list-style-position: inside"` on the `<ul>` for browsers to match.
-
 ## Building
 Dynodeck is written in C++23 and uses C++ modules (`.cppm` files) instead of header files. Each `.cppm` file declares
 `export module <name>;`, its implementation goes in the matching `.cpp` file, and other files use `import <name>;`.

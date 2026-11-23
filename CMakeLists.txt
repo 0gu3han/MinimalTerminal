@@ -52,7 +52,3 @@ add_test(NAME editor COMMAND editor_test)
 add_executable(slide_test tests/slide_test.cpp)
 target_link_libraries(slide_test PRIVATE deck testing)
 add_test(NAME slide COMMAND slide_test)
-
-add_executable(styler_test tests/styler_test.cpp)
-target_link_libraries(styler_test PRIVATE deck testing)
-add_test(NAME styler COMMAND styler_test)

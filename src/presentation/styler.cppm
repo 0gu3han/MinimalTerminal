@@ -26,9 +26,6 @@ export std::string encodeEntities(std::string text);
 /// The curses color for a tag with a style like style="color: red"
 export attr_t colorOf(const std::string &openingTag);
 
-/// Whether a tag has a style like style="text-align: center"
-export bool isCentered(const std::string &openingTag);
-
 /// Draw text at the window's cursor with its <b>, <strong>, <i>, <em> and <u>
 /// tags applied. Other tags are skipped.
 export void drawStyled(WINDOW *window, const std::string &html, attr_t style);
