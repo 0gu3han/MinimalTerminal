@@ -1,3 +1,4 @@
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -19,14 +20,16 @@ auto main(int argc, char *argv[]) -> int {
     return 1;
   }
 
-  // Pass fstream to Presentation constructor
-  Presentation presentation(file, fileName);
-
-  // Close the filestream
-  file.close();
-
-  // Invoke Presentation.start() method
-  presentation.start();
+  // Read the slides before curses starts, so a malformed file is reported on
+  // a normal terminal
+  try {
+    Presentation presentation(file, fileName);
+    file.close();
+    presentation.start();
+  } catch (const std::exception &error) {
+    std::cerr << fileName << ": " << error.what() << "\n";
+    return 1;
+  }
 
   return 0;
 }
