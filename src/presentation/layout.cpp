@@ -271,13 +271,22 @@ std::vector<Row> layOut(const std::vector<Block> &blocks, int width,
       switch (current.kind) {
       case BlockKind::Bullet: {
         const auto pieces = wrap(text, width - bulletIndent);
-        for (size_t piece = 0; piece < pieces.size(); ++piece)
+        for (size_t piece = 0; piece < pieces.size(); ++piece) {
+          const bool first = piece == 0;
+          int column = bulletIndent;
+          if (current.centered) {
+            // the first row is centered with its marker, the rest on their own
+            const int marker = first ? bulletIndent : 0;
+            const int rowWidth = marker + displayWidth(pieces[piece]);
+            column = std::max((width - rowWidth) / 2, 0) + marker;
+          }
           rows.push_back({.kind = RowKind::Bullet,
                           .block = block,
                           .line = line,
-                          .column = bulletIndent,
+                          .column = column,
                           .text = pieces[piece],
-                          .first = piece == 0});
+                          .first = first});
+        }
         break;
       }
       case BlockKind::Code: {
