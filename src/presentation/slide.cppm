@@ -36,7 +36,7 @@ public:
   bool hasCode() const { return hasCodeBlock; }
 
   /// @brief  Let the user type in the code until Esc keeps the changes or
-  /// Ctrl-X undoes them
+  /// Ctrl-Z undoes them
   /// @return Whether the changes were kept
   bool edit();
 
