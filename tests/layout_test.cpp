@@ -246,21 +246,6 @@ static void testLayOut() {
   rows = layOut({{BlockKind::Output, "", {"a\tb"}}}, 40, 5);
   expect(texts(rows), Lines{"a       b"}, "tabs in output are expanded");
 
-  rows = layOut({bullet("x")}, 40, 2);
-  expect(rows[0].column, bulletIndent, "bullets start at the left by default");
-
-  Block centered = bullet("hi");
-  centered.centered = true;
-  rows = layOut({centered}, 20, 5);
-  // "• hi" is 4 columns wide, so the marker is at 8 and the text at 10
-  expect(rows[0].column, 10, "centered bullet is centered with its marker");
-
-  centered.lines = {"aaaa bbbbbbbb"};
-  rows = layOut({centered}, 12, 5);
-  expect(texts(rows), Lines{"aaaa", "bbbbbbbb"}, "centered bullet wraps");
-  expect(rows[0].column, 5, "first row is centered with its marker");
-  expect(rows[1].column, 2, "later rows are centered on their own");
-
   Lines tall;
   for (int line = 0; line < 30; ++line)
     tall.push_back("line " + std::to_string(line));

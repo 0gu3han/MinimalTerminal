@@ -130,7 +130,7 @@ void drawBlocks(WINDOW *window, const std::vector<Block> &blocks) {
       const attr_t style = colorOf(blocks[row.block].openingTag);
       if (row.first) {
         wattrset(window, style);
-        mvwaddstr(window, screenRow, row.column - bulletIndent, "•");
+        mvwaddstr(window, screenRow, 0, "•");
       }
       wmove(window, screenRow, row.column);
       drawStyled(window, row.text, style);
@@ -224,8 +224,7 @@ void Slide::addBlock(const Element &element, size_t sourceStart,
   const std::string &tag = element.openingTag;
   std::vector<Block> &blocks = columns[column];
   if (tag.starts_with("<li"))
-    blocks.push_back(
-        {BlockKind::Bullet, tag, {element.content}, isCentered(tag)});
+    blocks.push_back({BlockKind::Bullet, tag, {element.content}});
   else if (tag.starts_with("<output")) {
     isOutput = true;
     blocks.push_back({BlockKind::Output, tag, outputLines(element.content)});
@@ -244,8 +243,7 @@ void Slide::addBlock(const Element &element, size_t sourceStart,
 void Slide::render() const {
   const Areas areas = areasFor(layout, getmaxy(stdscr), getmaxx(stdscr));
   const bool subsection = layout == LayoutType::Subsection;
-  drawHeading(areas.title, title, A_BOLD | colorOf(titleTag),
-              subsection || isCentered(titleTag));
+  drawHeading(areas.title, title, A_BOLD | colorOf(titleTag), subsection);
 
   if (subsection)
     drawHeading(areas.left, subtitle, colorOf(subtitleTag), true);

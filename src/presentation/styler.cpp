@@ -56,32 +56,18 @@ std::string encodeEntities(std::string text) {
   return text;
 }
 
-// where the value of a property like "color:" starts in the tag's style, past
-// any spaces, or npos if the tag does not set it
-static size_t valueStart(const std::string &openingTag,
-                         const std::string &property) {
-  const size_t start = openingTag.find(property);
-  if (start == std::string::npos)
-    return std::string::npos;
-  return openingTag.find_first_not_of(' ', start + property.size());
-}
-
 attr_t colorOf(const std::string &openingTag) {
-  const size_t colorStart = valueStart(openingTag, "color:");
+  size_t colorStart = openingTag.find("color:");
   if (colorStart == std::string::npos)
     return A_NORMAL;
 
+  // skip past "color:" and any spaces after it
+  colorStart = openingTag.find_first_not_of(' ', colorStart + 6);
   for (short color = COLOR_BLACK; color <= COLOR_WHITE; ++color)
     if (openingTag.compare(colorStart, colorNames[color].size(),
                            colorNames[color]) == 0)
       return COLOR_PAIR(color + 1);
   return A_NORMAL;
-}
-
-bool isCentered(const std::string &openingTag) {
-  const size_t alignStart = valueStart(openingTag, "text-align:");
-  return alignStart != std::string::npos &&
-         openingTag.compare(alignStart, 6, "center") == 0;
 }
 
 // the style a tag name turns on, or none if it does not style text

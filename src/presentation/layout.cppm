@@ -82,9 +82,6 @@ export struct Block {
   /// A bullet has one line of HTML, code has its decoded lines and output has
   /// its lines still encoded
   std::vector<std::string> lines;
-  /// Whether a bullet's rows are centered in the area, with its marker next
-  /// to the text, from style="text-align: center"
-  bool centered = false;
 };
 
 export enum class RowKind { Blank, Bullet, Code, Output, Overflow };
@@ -95,8 +92,7 @@ export struct Row {
   /// The block and line of the block the row shows
   size_t block = 0;
   size_t line = 0;
-  /// Where the text starts in the area. A bullet's marker is bulletIndent
-  /// columns before it.
+  /// Where the text starts in the area
   int column = 0;
   /// The HTML of a bullet or output row, or the plain text of a code row
   std::string text{};
