@@ -26,6 +26,10 @@ private:
   std::string document;
   std::string fileName;
 
+  /// Make the slides from the document, keeping the same slide current. Call
+  /// it after changing the document, since the slides remember where their
+  /// code is in it.
+  void load();
   void render();
   /// Where the slide's <article> starts in the document
   size_t articleStart(std::vector<Slide>::iterator article);
@@ -33,4 +37,7 @@ private:
   void save();
   /// Run the current slide's code and show what it printed on the next slide
   void runCode();
+  /// Edit the current slide's code with the code on top and what it printed
+  /// below. Ctrl-R runs it, Esc keeps the changes and Ctrl-X throws them away.
+  void editCode();
 };

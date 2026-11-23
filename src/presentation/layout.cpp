@@ -20,16 +20,16 @@ LayoutType layoutFromTag(const std::string &openingTag) {
 }
 
 Areas areasFor(LayoutType layout, int screenHeight, int screenWidth) {
-  const int width = screenWidth - 2 * MARGIN;
+  const int width = std::max(screenWidth - 2 * MARGIN, 0);
   // the content starts below the title and the gap, and stops above the
   // counter on the last row
   const int contentRow = TITLE_ROW + 1 + GAP;
-  const int contentHeight = screenHeight - 1 - contentRow;
+  const int contentHeight = std::max(screenHeight - 1 - contentRow, 0);
 
   Areas areas{};
   if (layout == LayoutType::Subsection) {
     // the title in the middle of the screen, the subtitle right under it
-    const int middle = screenHeight / 2 - 1;
+    const int middle = std::max(screenHeight / 2 - 1, 0);
     areas.title = {middle, MARGIN, 1, width};
     areas.left = {middle + 1, MARGIN, 1, width};
     return areas;
@@ -38,14 +38,43 @@ Areas areasFor(LayoutType layout, int screenHeight, int screenWidth) {
   areas.title = {TITLE_ROW, MARGIN, 1, width};
   if (layout == LayoutType::TwoContent) {
     // the right side gets any leftover column so nothing is lost on odd widths
-    const int leftWidth = (width - COLUMN_GAP) / 2;
+    const int leftWidth = std::max((width - COLUMN_GAP) / 2, 0);
+    const int rightWidth = std::max(width - leftWidth - COLUMN_GAP, 0);
     areas.left = {contentRow, MARGIN, contentHeight, leftWidth};
     areas.right = {contentRow, MARGIN + leftWidth + COLUMN_GAP, contentHeight,
-                   width - leftWidth - COLUMN_GAP};
+                   rightWidth};
   } else
     areas.left = {contentRow, MARGIN, contentHeight, width};
   return areas;
 }
+
+SplitAreas splitAreas(int screenHeight, int screenWidth) {
+  const int width = std::max(screenWidth, 0);
+  // the rows left once the two headers and the key help have theirs, with
+  // two fifths of them for the output
+  const int rows = std::max(screenHeight - 3, 0);
+  const int outputHeight = rows * 2 / 5;
+  const int editorHeight = rows - outputHeight;
+
+  SplitAreas areas{};
+  areas.editorHeader = {0, 0, 1, width};
+  areas.editor = {1, 0, editorHeight, width};
+  areas.outputHeader = {1 + editorHeight, 0, 1, width};
+  areas.output = {2 + editorHeight, 0, outputHeight, width};
+  areas.status = {std::max(screenHeight - 1, 0), 0, 1, width};
+  return areas;
+}
+
+// the bytes of the UTF-8 character starting at pos; the bytes after the first
+// byte of a character all start with 10
+static size_t characterSize(const std::string &text, size_t pos) {
+  size_t size = 1;
+  while (pos + size < text.size() &&
+         (static_cast<unsigned char>(text[pos + size]) & 0xC0) == 0x80)
+    ++size;
+  return size;
+}
+
 // how many bytes and columns one piece of the text takes: a whole tag, a whole
 // entity or one UTF-8 character
 struct Piece {
@@ -69,12 +98,7 @@ static Piece pieceAt(const std::string &html, size_t pos) {
       return {end - pos + 1, 1};
   }
 
-  // the bytes after the first byte of a UTF-8 character all start with 10
-  size_t size = 1;
-  while (pos + size < html.size() &&
-         (static_cast<unsigned char>(html[pos + size]) & 0xC0) == 0x80)
-    ++size;
-  return {size, 1};
+  return {characterSize(html, pos), 1};
 }
 
 static bool isSpace(char c) { return c == ' ' || c == '\n' || c == '\t'; }
@@ -181,4 +205,108 @@ std::string truncate(const std::string &html, int width) {
     pos += piece.size;
   }
   return result + "…";
+}
+
+// replace each tab with spaces up to the next stop, with pieceOf saying how
+// many bytes and columns the rest of the text takes
+template <typename PieceOf>
+static std::string expandTabsWith(const std::string &text, PieceOf pieceOf) {
+  std::string result;
+  int column = 0;
+  for (size_t pos = 0; pos < text.size();) {
+    const Piece piece = pieceOf(text, pos);
+    if (text[pos] == '\t') {
+      const int spaces = 8 - column % 8;
+      result.append(spaces, ' ');
+      column += spaces;
+    } else {
+      result.append(text, pos, piece.size);
+      column += piece.width;
+    }
+    pos += piece.size;
+  }
+  return result;
+}
+
+std::string expandTabs(const std::string &html) {
+  return expandTabsWith(html, pieceAt);
+}
+
+std::string expandCodeTabs(const std::string &text) {
+  // in code < and & are characters like any other
+  return expandTabsWith(text, [](const std::string &code, size_t pos) {
+    return Piece{characterSize(code, pos), 1};
+  });
+}
+
+Fit fitText(const std::string &text, int width) {
+  if (width <= 0)
+    return {0, false};
+
+  int columns = 0;
+  // the bytes in all but the last column, which is where the … goes
+  size_t allButLast = 0;
+  for (size_t pos = 0; pos < text.size(); pos += characterSize(text, pos)) {
+    if (columns == width)
+      return {allButLast, true};
+    if (++columns == width - 1)
+      allButLast = pos + characterSize(text, pos);
+  }
+  return {text.size(), false};
+}
+
+std::vector<Row> layOut(const std::vector<Block> &blocks, int width,
+                        int height) {
+  std::vector<Row> rows;
+  for (size_t block = 0; block < blocks.size(); ++block) {
+    const Block &current = blocks[block];
+    // bullets stack right under each other, and a blank row sets everything
+    // else apart
+    if (block > 0 && (current.kind != BlockKind::Bullet ||
+                      blocks[block - 1].kind != BlockKind::Bullet))
+      rows.push_back({.kind = RowKind::Blank});
+
+    for (size_t line = 0; line < current.lines.size(); ++line) {
+      const std::string &text = current.lines[line];
+      switch (current.kind) {
+      case BlockKind::Bullet: {
+        const auto pieces = wrap(text, width - bulletIndent);
+        for (size_t piece = 0; piece < pieces.size(); ++piece)
+          rows.push_back({.kind = RowKind::Bullet,
+                          .block = block,
+                          .line = line,
+                          .column = bulletIndent,
+                          .text = pieces[piece],
+                          .first = piece == 0});
+        break;
+      }
+      case BlockKind::Code: {
+        const std::string expanded = expandCodeTabs(text);
+        const Fit fit = fitText(expanded, width - 2 * codePadding);
+        rows.push_back({.kind = RowKind::Code,
+                        .block = block,
+                        .line = line,
+                        .column = codePadding,
+                        .text = expanded.substr(0, fit.bytes),
+                        .cut = fit.cut});
+        break;
+      }
+      case BlockKind::Output:
+        rows.push_back({.kind = RowKind::Output,
+                        .block = block,
+                        .line = line,
+                        .text = truncate(expandTabs(text), width)});
+        break;
+      }
+    }
+  }
+
+  if (height <= 0)
+    return {};
+  // show what fits, and say there is more on the last row
+  if (rows.size() > static_cast<size_t>(height)) {
+    rows.resize(height - 1);
+    rows.push_back({.kind = RowKind::Overflow, .text = "..."});
+  }
+  return rows;
 }
