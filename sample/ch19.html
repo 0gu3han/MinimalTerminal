@@ -393,6 +393,318 @@ if (it != numbers.end())
 cout << numbers.size(); // Output: 3</code></pre>
             </div>
         </article>
+        <!-- Something's a little bit funny about the original PowerPoint from here on... :P -->
+        <article>
+            <h2>19.6 The <code>tuple</code> Class</h2>
+        </article>
+        <article>
+            <h3>The <code>tuple</code> Class</h3>
+            <p>
+                <span id="dfn-tuple">
+                    A <dfn aria-describedby="dfn-tuple">tuple</dfn> is a container that can hold multiple values of
+                    different types.
+            </p>
+            </span>
+            <dl>
+                <dt>Multiple Types</dt>
+                <dd>Store different data types in a single object</dd>
+                <dt>Fixed Size</dt>
+                <dd>Number of elements set at compile time</dd>
+                <dt><code>&lt;tuple&gt;</code> Header</dt>
+                <dd>Must <code>#include &lt;tuple&gt;</code> to use tuples</dd>
+                <dt><code>get&lt;<var>N</var>&gt;()</code> Access</dt>
+                <dd>Retrieve elements by index or type</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, string, double&gt; student(101, "Alice", 3.85);
+cout << get<0>(student);    // Displays 101
+cout << get<1>(student);    // Displays Alice</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Creating Tuples</h3>
+            <p>There are several ways to create a tuple in C++:</p>
+            <ol>
+                <li>
+                    Using <code>make_tuple</code>
+                    <pre><code>tuple&lt;int, string, double&gt; itemTuple;
+itemTuple = make_tuple(123, "USB Cable", 8.99);</code></pre>
+                </li>
+                <li>
+                    Constructor Initialization
+                    <pre><code>tuple&lt;int, int, int&gt; nums(10, 20, 30);</code></pre>
+                </li>
+                <li>
+                    Using <code>auto</code> with <code>make_tuple</code>
+                    <pre><code>auto gradeTuple = make_tuple(97, 'A');</code></pre>
+                </li>
+                <li>
+                    Braced Initialization <small>(C++11)</small>
+                    <pre><code>tuple<string, int, double> info {"Maria Lopez", 21, 3.85};</code></pre>
+                </li>
+            </ol>
+            <p><b>Tip:</b> When using <code>auto</code> with <code>make_tuple</code>, the compiler automatically deduces
+                the tuple's data types. This is often the simplest way to create a tuple.</p>
+        </article>
+        <article>
+            <h3>Retrieving Items by Index From a Tuple</h3>
+            <p>Use the <code>get</code> function with an index inside angled brackets to retrieve a value. Indexes start
+                at 0.</p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, string, double&gt; itemTuple(123, "USB Cable", 8.99);
+
+int itemNumber = get&lt;0&gt;(itemTuple);      // 123
+string itemName = get&lt;1&gt;(itemTuple);     // "USB Cable"
+double itemPrice = get&lt;2&gt;(itemTuple);    // 8.99
+
+cout << get&lt;1&gt;(itemTuple) << endl;       // Displays: USB Cable</code></pre>
+            </div>
+            <!-- This is the dumbest table I've ever seen -->
+            <h4>How Tuple Indexing Works</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Index 0</th>
+                        <th>Index 1</th>
+                        <th>Index 2</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>123</code></td>
+                        <td><code>"USB Cable"</code></td>
+                        <td><code>8.99</code></td>
+                    </tr>
+                    <tr>
+                        <td>(<code>int</code>)</td>
+                        <td>(<code>string</code>)</td>
+                        <td>(<code>double</code>)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </article>
+        <article>
+            <h3>Retrieving Items by Type</h3>
+            <p>If all values in a tuple have different data types, you can retrieve values by specifying the type
+                instead of the index.</p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, string, double&gt; itemTuple(123, "USB Cable", 8.99);
+
+string itemName = get&lt;string&gt;(itemTuple);    // "USB Cable"
+cout << get&lt;double&gt;(itemTuple) << endl;      // Displays: 8.99</code></pre>
+            </div>
+            <h4>Warning: Duplicate Types</h4>
+            <p>If more than one value has the same type, you cannot retrieve by type. Use the index instead.</p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, int, int, double&gt; nums(1, 2, 3, 4.5);
+cout << get&lt;int&gt;(nums) << endl;       // ERROR! Multiple ints
+cout << get&lt;double&gt;(nums) << endl;    // OK: only one double</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Modifying the Contents of a Tuple</h3>
+            <p>Once a tuple is created, its contents can be modified using the <code>get</code> function on the left
+                side of an assignment operator.</p>
+            <figure>
+                <figcaption>Modify by Index</figcaption>
+                <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                    <meta itemprop="programmingLanguage" content="cpp" />
+                    <pre><code>tuple&lt;int, int, int&gt; nums(1, 2, 3);
+get<2>(nums) = 99;
+// nums now contains: 1, 2, 99</code></pre>
+                </div>
+            </figure>
+            <figure>
+                <figcaption>Modify by Type</figcaption>
+                <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                    <meta itemprop="programmingLanguage" content="cpp" />
+                    <pre><code>auto grade = make_tuple(90, 'A');
+get<char>(grade) = 'B';
+// grade now contains: 90, 'B'</code></pre>
+                </div>
+            </figure>
+            <h4>Assigning One Tuple to Another</h4>
+            You can assign one tuple to another if they have the same number and types of elements:
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, int, int&gt; numbers1(1, 2, 3);
+tuple&lt;int, int, int&gt; numbers2;
+numbers2 = numbers1;    // numbers2 now holds: 1, 2, 3</code></pre>
+            </div>
+            <p>A compiler error will occur if the tuples do not have the same number of elements.</p>
+        </article>
+        <article>
+            <h3>Swapping Tuples</h3>
+            <p>The tuple class has a member function named <b><code>swap</code></b> that exchanges the contents of two
+                tuples.</p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, int, int&gt; numbers1(1, 2, 3);
+tuple&lt;int, int, int&gt; numbers2(4, 5, 6);
+
+numbers1.swap(numbers2);</code></pre>
+            </div>
+            <!-- TODO: Maybe this table should use two-content? -->
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="2">Before Swap</th>
+                        <th colspan="2">After Swap</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>numbers1</code></td>
+                        <td>1, 2, 3</td>
+                        <td><code>numbers1</code></td>
+                        <td>4, 5, 6</td>
+                    </tr>
+                    <tr>
+                        <td><code>numbers2</code></td>
+                        <td>4, 5, 6</td>
+                        <td><code>numbers2</code></td>
+                        <td>1, 2, 3</td>
+                    </tr>
+                </tbody>
+            </table>
+        </article>
+        <article>
+            <h3>Unpacking a Tuple with <code>tie()</code></h3>
+            <p>
+                <span id="tie-dfn">
+                    The <dfn aria-describedby="tie-dfn"><code>tie</code></dfn> function unpacks a tuple and assigns its
+                    values to individual variables in a single statement.
+                </span>
+            </p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, char&gt; gradeTuple(90, 'A');
+int testScore;
+char grade;
+tie(testScore, grade) = gradeTuple;
+// testScore is 90, grade is 'A'</code></pre>
+            </div>
+            <h4>Using <code>ignore</code> to Skip Values</h4>
+            <p>Pass <code>ignore</code> as an argument to skip values you don't need:</p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, string, double&gt; itemTuple(123, "USB Cable", 8.99);
+int itemNumber;
+string itemName;
+tie(itemNumber, itemName, ignore) = itemTuple;
+// Extracts only the int and string; skips the double</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Structured Binding Declarations</h3>
+            <p>Perhaps the simplest way to unpack a tuple is with a structured binding declaration
+                <small>(C++17)</small>. It defines variables and initializes them from the tuple in a single statement.
+            </p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, int, int&gt; numbers(1, 2, 3);
+auto [num1, num2, num3] = numbers;
+// num1 is 1, num2 is 2, num3 is 3</code></pre>
+            </div>
+            <p>Works with tuples of different types:</p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;string, int, double&gt; studentInfo{"Mateo", 20, 3.9};
+auto [name, age, gpa] = studentInfo;
+
+cout << name << " is " << age << " years old with a GPA of " << gpa << endl;</code></pre>
+            </div>
+            <p><b>Key Advantage:</b> Structured bindings are shorter and cleaner than using <code>tie()</code> because
+                you don't need to declare variables first.</p>
+        </article>
+        <article>
+            <h3>Returning a Tuple from a Function</h3>
+            <p>Tuples are very useful when you need to return multiple values from a function. Package the values with
+                <code>make_tuple</code> and return them.
+            </p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, int, int&gt; getTestScores()
+{
+    int score1, score2, score3;
+    cout << "Enter three test scores: ";
+    cin >> score1 >> score2 >> score3;
+    return make_tuple(score1, score2, score3);
+}</code></pre>
+            </div>
+            <p>Calling the function and unpacking the result:</p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>// Using structured binding (simplest)
+auto [test1, test2, test3] = getTestScores();
+
+// Using tie
+int t1, t2, t3;
+tie(t1, t2, t3) = getTestScores();</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Comparing Tuples</h3>
+            <p>Tuples can be compared using the standard comparison operators (<code>==</code>, <code>!=</code>,
+                <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>). Elements are compared
+                from left to right.
+            </p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, string&gt; student1(85, "Ahmed Hassan");
+tuple&lt;int, string&gt; student2(90, "Lisa Chen");
+tuple&lt;int, string&gt; student3(85, "Ahmed Hassan");
+
+if (student1 == student3)
+    cout << "student1 and student3 are equal." << endl;
+
+if (student2 > student1)
+    cout << "student2 is greater than student1." << endl;</code></pre>
+            </div>
+            <dl>
+                <dt>Equality (<code>==</code>)</dt>
+                <dd>All corresponding elements must be equal for the tuples to be equal.</dd>
+                <dt>Other Comparisons (<code>&lt;</code>, <code>&gt;</code>, etc.)</dt>
+                <dd>Compared element by element from left to right until a difference is found.</dd>
+            </dl>
+        </article>
+        <article>
+            <h3>Concatenating Tuples with <code>tuple_cat</code></h3>
+            <p>
+                <span id="dfn-tuple_cat">The <dfn aria-describedby="dfn-tuple_cat"><code>tuple_cat</code></dfn> function
+                    combines multiple tuples into a single tuple, preserving the order of all elements.</span>
+            </p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, string&gt; first(99, "Hello");
+tuple&lt;double, char&gt; second(3.14, 'A');
+
+auto combined = tuple_cat(first, second);
+// combined type: tuple&lt;int, string, double, char&gt;
+// combined holds: 99, "Hello", 3.14, 'A'</code></pre>
+            </div>
+            <p>How <code>tuple_cat</code> works:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>first</th>
+                        <th>second</th>
+                        <th>combined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>99</code>, <code>"Hello"</code></td>
+                        <td><code>3.14</code>, <code>'A'</code></td>
+                        <td><code>99</code>, <code>"Hello"</code>, <code>3.14</code>, <code>'A'</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </article>
     </main>
 </body>
 
