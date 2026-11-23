@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chapter 19</title>
+</head>
+
+<body>
+    <main>
+        <article>
+            <h1>Chapter 19</h1>
+            <p>The Standard Template Library</p>
+        </article>
+        <article>
+            <h2>19.1 Introduction to the Standard Template Library</h2>
+        </article>
+        <article>
+            <h3>Introduction to the Standard Template Library</h3>
+            <p>The Standard Template Library (<abbr>STL</abbr>) contains templates
+                organized into three main categories:</p>
+            <dl>
+                <dt>Containers</dt>
+                <dd>Class templates for objects that store and organize data</dd>
+                <dt>Iterators</dt>
+                <dd>Class templates for objects that behave like pointers, used to access individual data elements</dd>
+                <dt>Algorithms</dt>
+                <dd>Function templates that perform various operations on container elements</dd>
+            </dl>
+        </article>
+        <article>
+            <h2>19.2 <abbr>STL</abbr> Container and Iterator Fundamentals</h2>
+        </article>
+        <article>
+            <h3><abbr>STL</abbr> Container and Iterator Fundamentals</h3>
+            <ul>
+                <li>A container is an object that holds a collection of values or other objects</li>
+                <li>An iterator is used to access and traverse the elements.</li>
+            </ul>
+            <h4>Understanding Containers</h4>
+            <dl>
+                <dt>Sequence Containers</dt>
+                <dd>Store data sequentially in memory (<code>array</code>, <code>vector</code>, <code>deque</code>,
+                    <code>list</code>, <code>forward_list</code>)
+                </dd>
+                <dt>Associative Containers</dt>
+                <dd>Store data for fast key-based lookup (<code>map</code>, <code>multimap</code>, <code>set</code>,
+                    <code>multiset</code>)
+                </dd>
+            </dl>
+            <p><b>Key Point:</b> Containers must include appropriate header files (<code>&lt;vector&gt;</code>,
+                <code>&lt;map&gt;</code>, <code>&lt;set&gt;</code>, etc.) and use the <code>std</code> namespace.
+            </p>
+        </article>
+        <article>
+            <h3>The <code>array</code> Class</h3>
+            <p>A traditional C++ array enhanced with bounds-checking and useful member functions.</p>
+            <h4>Key Features</h4>
+            <ul>
+                <li>Fixed size known at compile time</li>
+                <li>Defined in <code>&lt;array&gt;</code> header</li>
+                <li>Syntax: <code>array&lt;Type, Size&gt; arrayName;</code></li>
+                <li>Member functions: <code>at()</code>, <code>front()</code>, <code>back()</code>, <code>size()</code>,
+                    <code>fill()</code>
+                </li>
+            </ul>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>array&lt;int, 5&gt; numbers = {10, 20, 30, 40, 50};
+cout << numbers.at(0) << endl;    // Safe access
+numbers.fill(99);                 // Set all to 99</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Iterators: Uniform Container Access</h3>
+            <p>Iterators provide a consistent way to access elements in any <abbr>STL</abbr> container, regardless of
+                internal structure.</p>
+            <h4>Iterator Categories</h4>
+            <dl>
+                <dt>Forward</dt>
+                <dd>Move forward only (<code>++</code>)</dd>
+                <dt>Bidirectional</dt>
+                <dd>Move forward or backward (<code>++</code>, <code>--</code>)</dd>
+                <dt>Random Access</dt>
+                <dd>Jump to any element</dd>
+                <dt>Input/Output</dt>
+                <dd>Work with streams</dd>
+            </dl>
+            <p>Think of iterators as bookmarks that can move through container elements!</p>
+        </article>
+        <article>
+            <h3>Iterator Operations</h3>
+            <p>Iterators work like pointers and support similar operations:</p>
+            <dl>
+                <dt><code>*</code> operator</dt>
+                <dd>Dereference to get element value</dd>
+                <dt><code>-></code> operator</dt>
+                <dd>Access object members</dd>
+                <dt><code>++</code> operator</dt>
+                <dd>Move to next element</dd>
+                <dt><code>--</code> operator</dt>
+                <dd>Move to previous element (bidirectional)</dd>
+                <dt><code>==</code> operator</dt>
+                <dt><code>!=</code> operator</dt>
+                <dd>Compare iterators</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>vector&lt;string&gt; names = {"Alice", "Elana", "Yuki"};
+auto it = names.begin();
+cout << *it;             // Displays "Alice"
+it++;                    // Move to next element</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3><code>const_iterator</code></h3>
+            <p>A <code>const_iterator</code> prevents modification of container elements while allowing traversal.</p>
+            <h4>Key Features</h4>
+            <ul>
+                <li>Use <code>cbegin()</code> and <code>cend()</code> member functions</li>
+                <li>Cannot modify elements through a <code>const_iterator</code></li>
+                <li>Compiler enforces read-only access</li>
+                <li>Use <code>const</code> keyword for cleaner code</li>
+            </ul>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>array&lt;string, 3&gt; cities = {"Tokyo", "Paris", "Mumbai"};
+for (auto it = cities.cbegin(); it != cities.cend(); it++)
+{
+    cout << *it << endl;    // OK - reading
+    // *it = "NewCity";     // ERROR - cannot modify
+}</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Reverse Iterators</h3>
+            <p>Reverse iterators traverse containers from end to beginning.</p>
+            <h4>Member Functions</h4>
+            <dl>
+                <dt><code>rbegin()</code></dt>
+                <dd>Points to last element</dd>
+                <dt><code>rend()</code></dt>
+                <dd>Points before first element</dd>
+                <dt><code>crbegin()</code></dt>
+                <dt><code>crend()</code></dt>
+                <dd>const versions</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>vector&lt;int&gt; numbers = {1, 2, 3, 4, 5};
+// Display in reverse order
+for (auto it = numbers.rbegin(); it != numbers.rend(); it++)
+{
+    cout << *it << " "; // Displays: 5 4 3 2 1
+}</code></pre>
+            </div>
+        </article>
+        <article>
+            <h2>19.3 The <code>vector</code> Class</h2>
+        </article>
+        <article>
+            <h3>The <code>vector</code> Class</h3>
+            <h4>Advantages over Traditional Arrays</h4>
+            <ul>
+                <li>Automatically adjusts size as elements are added or removed</li>
+                <li>Provides bounds-checking with <code>at()</code> member function</li>
+                <li>Reports its own size with <code>size()</code> member function</li>
+                <li>Can be initialized with values or created empty</li>
+            </ul>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>vector&lt;int&gt; numbers = {1, 2, 3};
+numbers.push_back(4);     // Add to end
+cout << numbers.size();   // Output: 4</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Key <code>vector</code> Member Functions</h3>
+            <dl>
+                <dt><code>push_back(<var>value</var>)</code></dt>
+                <dd>Add element to end</dd>
+                <dt><code>pop_back()</code></dt>
+                <dd>Remove last element</dd>
+                <dt><code>insert(<var>iterator</var>, <var>value</var>)</code></dt>
+                <dd>Insert at specified position</dd>
+                <dt><code>erase(<var>iterator</var>)</code></dt>
+                <dd>Remove element at position</dd>
+                <dt><code>clear()</code></dt>
+                <dd>Remove all elements</dd>
+                <dt><code>empty()</code></dt>
+                <dd>Check if container is empty</dd>
+                <dt><code>emplace_back(<var>args...</var>)</code></dt>
+                <dd>Efficiently construct element in-place</dd>
+            </dl>
+            <p>Note: Emplace functions are more efficient than <code>insert</code>/<code>push_back</code> for complex
+                objects!</p>
+        </article>
+        <article>
+            <h2>19.4 The Map Classes</h2>
+        </article>
+        <article>
+            <h3>The Map Classes</h3>
+            <ul>
+                <li>Each element in a map has two parts: a <b>key</b> and a <b>value</b></li>
+                <li>Keys are used to locate specific values</li>
+            </ul>
+            <p>Think of a map like a dictionary: words (keys) mapped to definitions (values).</p>
+            <h4>Map Types</h4>
+            <dl>
+                <dt><code>map</code></dt>
+                <dd>Sorted, unique keys only</dd>
+                <dt><code>multimap</code></dt>
+                <dd>Sorted, allows duplicate keys</dd>
+                <dt><code>unordered_map</code></dt>
+                <dd>Fast lookup, not sorted</dd>
+                <dt><code>unordered_multimap</code></dt>
+                <dd>Fast lookup, duplicate keys allowed</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>map&lt;int, string&gt; employees;
+employees[101] = "Alice";
+employees[102] = "Elana";</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Accessing Map Elements</h3>
+            <p>Maps provide multiple ways to access and modify elements:</p>
+            <dl>
+                <dt><code>[]</code> operator</dt>
+                <dd>Creates an element if the key doesn't exist</dd>
+                <dt><code>at()</code> function</dt>
+                <dd>Throws an exception if the key is not found</dd>
+                <dt><code>find()</code> function</dt>
+                <dd>Returns an iterator, or <code>end()</code> if not found</dd>
+                <dt><code>count()</code> function</dt>
+                <dd>Returns 0 or 1 (for map)</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>map&lt;int, string&gt; employees = {{101, "Alice"}, {102, "Elana"}};
+
+// Access using []
+cout << employees[101];      // "Alice"
+
+// Check if key exists
+if (employees.count(103) > 0)
+    cout << "Found!" << endl;</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Iterating Through Maps</h3>
+            <p>Map iterators provide access to both keys and values using <code>first</code> and <code>second</code>
+                members.</p>
+            <h4>Key Points</h4>
+            <ul>
+                <li>Elements automatically sorted by key</li>
+                <li><code>it->first</code> accesses the key</li>
+                <li><code>it->second</code> accesses the value</li>
+                <li>Use <code>auto</code> for cleaner code</li>
+            </ul>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>map&lt;int, string&gt; employees = {{101, "Alice"}, {102, "Elana"}};
+
+for (auto it = employees.begin(); it != employees.end(); it++)
+{
+    cout << "ID: " << it->first << " Name: " << it->second << endl;
+}</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Map <code>insert()</code> and <code>erase()</code> Functions</h3>
+            <p>Adding and removing elements from maps:</p>
+            <dl>
+                <dt><code>insert()</code></dt>
+                <dd>Add key-value pairs</dd>
+                <dt><code>erase(<var>key</var>)</code></dt>
+                <dd>Remove element by key</dd>
+                <dt><code>erase(<var>iterator</var>)</code></dt>
+                <dd>Remove element at iterator position</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>map&lt;int, string&gt; employees;
+// Insert elements
+employees.insert({101, "Alice"});
+employees.insert(make_pair(102, "Elana"));
+employees[103] = "Yuki";                   // Alternative syntax
+// Erase elements
+employees.erase(102);                      // Remove by key
+cout << employees.size();                  // Output: 2</code></pre>
+            </div>
+        </article>
+        <article>
+            <h2>19.5 The Set Classes</h2>
+        </article>
+        <article>
+            <h3>The Set Classes</h3>
+            <ul>
+                <li>Sets store collections of unique values</li>
+                <li>They automatically prevent duplicates</li>
+            </ul>
+            <h4>Set Types</h4>
+            <dl>
+                <dt><code>set</code></dt>
+                <dd>Sorted, no duplicates</dd>
+                <dt><code>multiset</code></dt>
+                <dd>Sorted, allows duplicates</dd>
+                <dt><code>unordered_set</code></dt>
+                <dd>Fast operations, not sorted, no duplicates</dd>
+                <dt><code>unordered_multiset</code></dt>
+                <dd>Fast operations, not sorted, allows duplicates</dd>
+            </dl>
+            <h4>Key Operations</h4>
+            <dl>
+                <dt><code>insert()</code></dt>
+                <dd>Add elements</dd>
+                <dt><code>find()</code></dt>
+                <dd>Locate elements</dd>
+                <dt><code>erase()</code></dt>
+                <dd>Remove elements</dd>
+            </dl>
+        </article>
+        <article>
+            <h3>Set <code>insert()</code> and Duplicate Handling</h3>
+            <p>Sets automatically reject duplicate values - attempting to insert duplicates is safe but has no effect.
+            </p>
+            <h4>Key Characteristics</h4>
+            <ul>
+                <li>Elements automatically sorted in ascending order</li>
+                <li><code>insert()</code> returns <code>pair&lt;iterator, bool&gt;</code></li>
+                <li>Second value is <code>true</code> if insertion succeeded, <code>false</code> if duplicate</li>
+            </ul>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>set&lt;int&gt; numbers;
+numbers.insert(10);
+numbers.insert(20);
+numbers.insert(10);     // Ignored - duplicate
+
+// numbers now contains: {10, 20}
+cout << numbers.size(); // Output: 2</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Searching Sets: <code>find()</code> and <code>contains()</code></h3>
+            <p>Sets provide efficient searching for element membership:</p>
+            <dl>
+                <dt><code>find(<var>value</var>)</code></dt>
+                <dd>Returns iterator to element, or <code>end()</code> if not found</dd>
+                <dt><code>contains(<var>value</var>)</code></dt>
+                <dd>Returns <code>true</code>/<code>false</code> <small>(C++20)</small></dd>
+                <dt><code>count(<var>value</var>)</code></dt>
+                <dd>Returns 0 or 1 for <code>set</code>, can be higher for <code>multiset</code></dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>set&lt;int&gt; numbers = {10, 20, 30, 40, 50};
+
+// Using find()
+auto it = numbers.find(30);
+if (it != numbers.end())
+    cout << "Found: " << *it << endl;
+
+// Using contains() (C++20)
+if (numbers.contains(30))
+    cout << "30 is in the set" << endl;</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Removing Elements from Sets</h3>
+            <p>Sets provide multiple ways to remove elements:</p>
+            <dl>
+                <dt><code>erase(<var>value</var>)</code></dt>
+                <dd>Remove element by value</dd>
+                <dt><code>erase(<var>iterator</var>)</code></dt>
+                <dd>Remove element at iterator position</dd>
+                <dt><code>clear()</code></dt>
+                <dd>Remove all elements</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>set&lt;int&gt; numbers = {10, 20, 30, 40, 50};
+
+// Remove by value
+numbers.erase(30);
+
+// Remove using iterator
+auto it = numbers.find(40);
+if (it != numbers.end())
+    numbers.erase(it);
+
+cout << numbers.size(); // Output: 3</code></pre>
+            </div>
+        </article>
+        <!-- Something's a little bit funny about the original PowerPoint from here on... :P -->
+        <article>
+            <h2>19.6 The <code>tuple</code> Class</h2>
+        </article>
+        <article>
+            <h3>The <code>tuple</code> Class</h3>
+            <p>
+                <span id="dfn-tuple">
+                    A <dfn aria-describedby="dfn-tuple">tuple</dfn> is a container that can hold multiple values of
+                    different types.
+            </p>
+            </span>
+            <dl>
+                <dt>Multiple Types</dt>
+                <dd>Store different data types in a single object</dd>
+                <dt>Fixed Size</dt>
+                <dd>Number of elements set at compile time</dd>
+                <dt><code>&lt;tuple&gt;</code> Header</dt>
+                <dd>Must <code>#include &lt;tuple&gt;</code> to use tuples</dd>
+                <dt><code>get&lt;<var>N</var>&gt;()</code> Access</dt>
+                <dd>Retrieve elements by index or type</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, string, double&gt; student(101, "Alice", 3.85);
+cout << get<0>(student);    // Displays 101
+cout << get<1>(student);    // Displays Alice</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Creating Tuples</h3>
+            <p>There are several ways to create a tuple in C++:</p>
+            <ol>
+                <li>
+                    Using <code>make_tuple</code>
+                    <pre><code>tuple&lt;int, string, double&gt; itemTuple;
+itemTuple = make_tuple(123, "USB Cable", 8.99);</code></pre>
+                </li>
+                <li>
+                    Constructor Initialization
+                    <pre><code>tuple&lt;int, int, int&gt; nums(10, 20, 30);</code></pre>
+                </li>
+                <li>
+                    Using <code>auto</code> with <code>make_tuple</code>
+                    <pre><code>auto gradeTuple = make_tuple(97, 'A');</code></pre>
+                </li>
+                <li>
+                    Braced Initialization <small>(C++11)</small>
+                    <pre><code>tuple<string, int, double> info {"Maria Lopez", 21, 3.85};</code></pre>
+                </li>
+            </ol>
+            <p><b>Tip:</b> When using <code>auto</code> with <code>make_tuple</code>, the compiler automatically deduces
+                the tuple's data types. This is often the simplest way to create a tuple.</p>
+        </article>
+        <article>
+            <h3>Retrieving Items by Index From a Tuple</h3>
+            <p>Use the <code>get</code> function with an index inside angled brackets to retrieve a value. Indexes start
+                at 0.</p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, string, double&gt; itemTuple(123, "USB Cable", 8.99);
+
+int itemNumber = get&lt;0&gt;(itemTuple);      // 123
+string itemName = get&lt;1&gt;(itemTuple);     // "USB Cable"
+double itemPrice = get&lt;2&gt;(itemTuple);    // 8.99
+
+cout << get&lt;1&gt;(itemTuple) << endl;       // Displays: USB Cable</code></pre>
+            </div>
+            <!-- This is the dumbest table I've ever seen -->
+            <h4>How Tuple Indexing Works</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Index 0</th>
+                        <th>Index 1</th>
+                        <th>Index 2</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>123</code></td>
+                        <td><code>"USB Cable"</code></td>
+                        <td><code>8.99</code></td>
+                    </tr>
+                    <tr>
+                        <td>(<code>int</code>)</td>
+                        <td>(<code>string</code>)</td>
+                        <td>(<code>double</code>)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </article>
+        <article>
+            <h3>Retrieving Items by Type</h3>
+            <p>If all values in a tuple have different data types, you can retrieve values by specifying the type
+                instead of the index.</p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, string, double&gt; itemTuple(123, "USB Cable", 8.99);
+
+string itemName = get&lt;string&gt;(itemTuple);    // "USB Cable"
+cout << get&lt;double&gt;(itemTuple) << endl;      // Displays: 8.99</code></pre>
+            </div>
+            <h4>Warning: Duplicate Types</h4>
+            <p>If more than one value has the same type, you cannot retrieve by type. Use the index instead.</p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, int, int, double&gt; nums(1, 2, 3, 4.5);
+cout << get&lt;int&gt;(nums) << endl;       // ERROR! Multiple ints
+cout << get&lt;double&gt;(nums) << endl;    // OK: only one double</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Modifying the Contents of a Tuple</h3>
+            <p>Once a tuple is created, its contents can be modified using the <code>get</code> function on the left
+                side of an assignment operator.</p>
+            <figure>
+                <figcaption>Modify by Index</figcaption>
+                <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                    <meta itemprop="programmingLanguage" content="cpp" />
+                    <pre><code>tuple&lt;int, int, int&gt; nums(1, 2, 3);
+get<2>(nums) = 99;
+// nums now contains: 1, 2, 99</code></pre>
+                </div>
+            </figure>
+            <figure>
+                <figcaption>Modify by Type</figcaption>
+                <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                    <meta itemprop="programmingLanguage" content="cpp" />
+                    <pre><code>auto grade = make_tuple(90, 'A');
+get<char>(grade) = 'B';
+// grade now contains: 90, 'B'</code></pre>
+                </div>
+            </figure>
+            <h4>Assigning One Tuple to Another</h4>
+            You can assign one tuple to another if they have the same number and types of elements:
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, int, int&gt; numbers1(1, 2, 3);
+tuple&lt;int, int, int&gt; numbers2;
+numbers2 = numbers1;    // numbers2 now holds: 1, 2, 3</code></pre>
+            </div>
+            <p>A compiler error will occur if the tuples do not have the same number of elements.</p>
+        </article>
+        <article>
+            <h3>Swapping Tuples</h3>
+            <p>The tuple class has a member function named <b><code>swap</code></b> that exchanges the contents of two
+                tuples.</p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, int, int&gt; numbers1(1, 2, 3);
+tuple&lt;int, int, int&gt; numbers2(4, 5, 6);
+
+numbers1.swap(numbers2);</code></pre>
+            </div>
+            <!-- TODO: Maybe this table should use two-content? -->
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="2">Before Swap</th>
+                        <th colspan="2">After Swap</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>numbers1</code></td>
+                        <td>1, 2, 3</td>
+                        <td><code>numbers1</code></td>
+                        <td>4, 5, 6</td>
+                    </tr>
+                    <tr>
+                        <td><code>numbers2</code></td>
+                        <td>4, 5, 6</td>
+                        <td><code>numbers2</code></td>
+                        <td>1, 2, 3</td>
+                    </tr>
+                </tbody>
+            </table>
+        </article>
+        <article>
+            <h3>Unpacking a Tuple with <code>tie()</code></h3>
+            <p>
+                <span id="tie-dfn">
+                    The <dfn aria-describedby="tie-dfn"><code>tie</code></dfn> function unpacks a tuple and assigns its
+                    values to individual variables in a single statement.
+                </span>
+            </p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, char&gt; gradeTuple(90, 'A');
+int testScore;
+char grade;
+tie(testScore, grade) = gradeTuple;
+// testScore is 90, grade is 'A'</code></pre>
+            </div>
+            <h4>Using <code>ignore</code> to Skip Values</h4>
+            <p>Pass <code>ignore</code> as an argument to skip values you don't need:</p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, string, double&gt; itemTuple(123, "USB Cable", 8.99);
+int itemNumber;
+string itemName;
+tie(itemNumber, itemName, ignore) = itemTuple;
+// Extracts only the int and string; skips the double</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Structured Binding Declarations</h3>
+            <p>Perhaps the simplest way to unpack a tuple is with a structured binding declaration
+                <small>(C++17)</small>. It defines variables and initializes them from the tuple in a single statement.
+            </p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, int, int&gt; numbers(1, 2, 3);
+auto [num1, num2, num3] = numbers;
+// num1 is 1, num2 is 2, num3 is 3</code></pre>
+            </div>
+            <p>Works with tuples of different types:</p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;string, int, double&gt; studentInfo{"Mateo", 20, 3.9};
+auto [name, age, gpa] = studentInfo;
+
+cout << name << " is " << age << " years old with a GPA of " << gpa << endl;</code></pre>
+            </div>
+            <p><b>Key Advantage:</b> Structured bindings are shorter and cleaner than using <code>tie()</code> because
+                you don't need to declare variables first.</p>
+        </article>
+        <article>
+            <h3>Returning a Tuple from a Function</h3>
+            <p>Tuples are very useful when you need to return multiple values from a function. Package the values with
+                <code>make_tuple</code> and return them.
+            </p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, int, int&gt; getTestScores()
+{
+    int score1, score2, score3;
+    cout << "Enter three test scores: ";
+    cin >> score1 >> score2 >> score3;
+    return make_tuple(score1, score2, score3);
+}</code></pre>
+            </div>
+            <p>Calling the function and unpacking the result:</p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>// Using structured binding (simplest)
+auto [test1, test2, test3] = getTestScores();
+
+// Using tie
+int t1, t2, t3;
+tie(t1, t2, t3) = getTestScores();</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Comparing Tuples</h3>
+            <p>Tuples can be compared using the standard comparison operators (<code>==</code>, <code>!=</code>,
+                <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>). Elements are compared
+                from left to right.
+            </p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, string&gt; student1(85, "Ahmed Hassan");
+tuple&lt;int, string&gt; student2(90, "Lisa Chen");
+tuple&lt;int, string&gt; student3(85, "Ahmed Hassan");
+
+if (student1 == student3)
+    cout << "student1 and student3 are equal." << endl;
+
+if (student2 > student1)
+    cout << "student2 is greater than student1." << endl;</code></pre>
+            </div>
+            <dl>
+                <dt>Equality (<code>==</code>)</dt>
+                <dd>All corresponding elements must be equal for the tuples to be equal.</dd>
+                <dt>Other Comparisons (<code>&lt;</code>, <code>&gt;</code>, etc.)</dt>
+                <dd>Compared element by element from left to right until a difference is found.</dd>
+            </dl>
+        </article>
+        <article>
+            <h3>Concatenating Tuples with <code>tuple_cat</code></h3>
+            <p>
+                <span id="dfn-tuple_cat">The <dfn aria-describedby="dfn-tuple_cat"><code>tuple_cat</code></dfn> function
+                    combines multiple tuples into a single tuple, preserving the order of all elements.</span>
+            </p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>tuple&lt;int, string&gt; first(99, "Hello");
+tuple&lt;double, char&gt; second(3.14, 'A');
+
+auto combined = tuple_cat(first, second);
+// combined type: tuple&lt;int, string, double, char&gt;
+// combined holds: 99, "Hello", 3.14, 'A'</code></pre>
+            </div>
+            <p>How <code>tuple_cat</code> works:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>first</th>
+                        <th>second</th>
+                        <th>combined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>99</code>, <code>"Hello"</code></td>
+                        <td><code>3.14</code>, <code>'A'</code></td>
+                        <td><code>99</code>, <code>"Hello"</code>, <code>3.14</code>, <code>'A'</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </article>
+        <article>
+            <h2>19.7 Algorithms</h2>
+        </article>
+        <article>
+            <h3>Algorithms</h3>
+            <p><abbr>STL</abbr> algorithms are function templates that perform common operations on containers.</p>
+            <h4>Algorithm Categories</h4>
+            <dl>
+                <dt>Min/max algorithms</dt>
+                <dd>Find smallest and largest values</dd>
+                <dt>Sorting algorithms</dt>
+                <dd>Sort or check if sorted</dd>
+                <dt>Search algorithms</dt>
+                <dd>Search sorted ranges</dd>
+                <dt>Read-only algorithms</dt>
+                <dd>Iterate without modifying</dd>
+                <dt>Modifying algorithms</dt>
+                <dd>Copy, move, transform elements</dd>
+            </dl>
+            <p>Most algorithms require the <code>&lt;algorithm&gt;</code> header file.</p>
+        </article>
+        <article>
+            <h3>Common <abbr>STL</abbr> Algorithms</h3>
+            <dl>
+                <dt><code>sort()</code></dt>
+                <dd>Sort elements in ascending order</dd>
+                <dt><code>find()</code></dt>
+                <dd>Search for a value</dd>
+                <dt><code>count()</code></dt>
+                <dd>Count occurrences of a value</dd>
+                <dt><code>reverse()</code></dt>
+                <dd>Reverse order of elements</dd>
+                <dt><code>min_element()</code></dt>
+                <dt><code>max_element()</code></dt>
+                <dd>Find min/max</dd>
+                <dt><code>binary_search()</code></dt>
+                <dd>Check if sorted range contains value</dd>
+                <dt><code>for_each()</code></dt>
+                <dd>Apply function to each element</dd>
+                <dt><code>transform()</code></dt>
+                <dd>Apply function and store results</dd>
+            </dl>
+        </article>
+        <article>
+            <h3><code>min_element()</code> and <code>max_element()</code></h3>
+            <p>These algorithms find the smallest and largest elements in a range:</p>
+            <ul>
+                <li>Return iterators pointing to the minimum or maximum element</li>
+                <li>Must dereference the iterator to get the value</li>
+                <li><code>minmax_element()</code> returns both min and max as a pair</li>
+            </ul>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>vector&lt;int&gt; values = {45, 46, 2, 47, 48, 999, 49, 50};
+
+// Find min and max
+auto min = min_element(values.begin(), values.end());
+auto max = max_element(values.begin(), values.end());
+
+cout << "Minimum: " << *min << endl;  // 2
+cout << "Maximum: " << *max << endl;  // 999</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3><code>sort()</code> and <code>binary_search()</code></h3>
+            <p>Sorting and searching are fundamental <abbr>STL</abbr> algorithms:</p>
+            <dl>
+                <dt><code>sort()</code></dt>
+                <dd>Sorts elements in ascending order (default)</dd>
+                <dt><code>binary_search()</code></dt>
+                <dd>Efficiently searches sorted ranges</dd>
+                <dd>Returns <code>true</code> if value found, <code>false</code> otherwise</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>vector&lt;int&gt; numbers = {50, 10, 40, 20, 30};
+
+// Sort the vector
+sort(numbers.begin(), numbers.end());
+// numbers is now: {10, 20, 30, 40, 50}
+
+// Binary search (only works on sorted ranges)
+if (binary_search(numbers.begin(), numbers.end(), 30))
+    cout << "Found 30!" << endl;</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3><code>find()</code> and <code>count()</code></h3>
+            <p>Search algorithms for locating values in containers:</p>
+            <dl>
+                <dt><code>find()</code></dt>
+                <dd>Returns iterator to first occurrence, or end() if not found</dd>
+                <dt><code>count()</code></dt>
+                <dd>Returns number of occurrences of a value</dd>
+                <dd>Work on unsorted ranges (unlike <code>binary_search</code>)</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>vector&lt;int&gt; numbers = {10, 20, 30, 20, 40};
+
+// Find first occurrence of 20
+auto it = find(numbers.begin(), numbers.end(), 20);
+if (it != numbers.end())
+    cout << "Item Found\n";
+
+// Count occurrences
+int occurrences = count(numbers.begin(), numbers.end(), 20);
+cout << "Found " << occurrences << " times"; // 2</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3><code>remove()</code> and <code>reverse()</code></h3>
+            <p>Modifying algorithms that rearrange container elements:</p>
+            <dl>
+                <dt><code>remove()</code></dt>
+                <dd>Moves unwanted elements to end, doesn't delete them</dd>
+                <dd>Must call <code>erase()</code> to actually delete</dd>
+                <dt><code>reverse()</code></dt>
+                <dd>Reverses the order of elements in a range</dd>
+            </dl>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>vector&lt;int&gt; numbers = {1, 7, 3, 7, 4, 7, 5};
+
+// Remove all 7s (erase-remove idiom)
+auto newEnd = remove(numbers.begin(), numbers.end(), 7);
+numbers.erase(newEnd, numbers.end());
+// numbers is now: {1, 3, 4, 5}
+
+reverse(numbers.begin(), numbers.end());
+// numbers is now: {5, 4, 3, 1}</code></pre>
+            </div>
+        </article>
+        <article>
+            <h2>19.8 Passing Functions to Algorithms</h2>
+        </article>
+        <article>
+            <h3>Passing Functions to Algorithms</h3>
+            <p>Many <abbr>STL</abbr> algorithms can accept functions to customize their behavior.</p>
+            <h4>Three Ways to Pass Functions</h4>
+            <dl>
+                <dt>Function Pointers</dt>
+                <dd>Pass regular function names</dd>
+                <dt>Function Objects (Functors)</dt>
+                <dd>Objects that act like functions (covered in Chapter 20)</dd>
+                <dt>Lambda Expressions</dt>
+                <dd>Anonymous inline functions (covered in Chapter 20)</dd>
+            </dl>
+        </article>
+        <article>
+            <h3><code>for_each()</code> with Function Pointers</h3>
+            <p>The <code>for_each</code> algorithm applies a function to each element in a range:</p>
+            <!-- I've omitted bolded text and an arrow here -->
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>// Function to display and modify each element
+void displayAndDouble(int& num)
+{
+    cout << "Before: " << num << ", ";
+    num *= 2;
+    cout << "After: " << num << endl;
+}
+
+int main()
+{
+    vector&lt;int&gt; numbers = {1, 2, 3, 4, 5};
+    
+    // Apply function to each element
+    for_each(numbers.begin(), numbers.end(), displayAndDouble);
+    
+    // numbers is now: {2, 4, 6, 8, 10}
+    return 0;
+}</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3>Using Predicates with Algorithms</h3>
+            <p>Predicates are functions that return <code>bool</code> values, used with many algorithms:</p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>// Predicate function - returns true if even
+bool isEven(int num)
+{
+    return num % 2 == 0;
+}
+
+vector&lt;int&gt; numbers = {1, 2, 3, 4, 5, 6, 7, 8};
+
+// Count even numbers
+int evenCount = count_if(numbers.begin(), numbers.end(), isEven);
+cout << "Even numbers: " << evenCount << endl; // Output: 4
+
+// Find first even number
+auto it = find_if(numbers.begin(), numbers.end(), isEven);
+cout << "First even: " << *it << endl; // Output: 2</code></pre>
+            </div>
+        </article>
+        <article>
+            <h3><code>transform()</code> with Function Pointers</h3>
+            <p>The transform algorithm applies a function to each element and stores results:</p>
+            <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
+                <meta itemprop="programmingLanguage" content="cpp" />
+                <pre><code>// Function to square a number
+int square(int num)
+{
+    return num * num;
+}
+
+int main()
+{
+    vector&lt;int&gt; numbers = {1, 2, 3, 4, 5};
+    vector&lt;int&gt; results(5);  // Destination vector
+    
+    // Transform each element and store in results
+    transform(numbers.begin(), numbers.end(), results.begin(), square);
+    
+    // results is now: {1, 4, 9, 16, 25}
+    return 0;
+}</code></pre>
+            </div>
+        </article>
+    </main>
+</body>
+
+</html>
