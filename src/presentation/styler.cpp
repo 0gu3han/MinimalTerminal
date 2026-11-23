@@ -70,24 +70,44 @@ attr_t colorOf(const std::string &openingTag) {
   return A_NORMAL;
 }
 
-void drawStyled(const std::string &html, attr_t style) {
-  attrset(style);
+// the style a tag name turns on, or none if it does not style text
+static attr_t attributeOf(const std::string &name) {
+  if (name == "b" || name == "strong")
+    return A_BOLD;
+  if (name == "i" || name == "em")
+    return A_ITALIC;
+  if (name == "u")
+    return A_UNDERLINE;
+  return A_NORMAL;
+}
+
+void drawStyled(WINDOW *window, const std::string &html, attr_t style) {
+  wattrset(window, style);
   for (size_t textStart = 0; textStart < html.size();) {
     size_t tagStart = html.find('<', textStart);
     // text between tags has no tags in it, so it is safe to decode
-    addstr(decodeEntities(html.substr(textStart, tagStart - textStart)).c_str());
+    waddstr(
+        window,
+        decodeEntities(html.substr(textStart, tagStart - textStart)).c_str());
     if (tagStart == std::string::npos)
       break;
 
-    // each tag turns bold, italic or underline on or off
-    bool closing = html[tagStart + 1] == '/';
-    char tag = html[tagStart + 1 + closing];
-    attr_t attribute = tag == 'b' ? A_BOLD : tag == 'i' ? A_ITALIC : A_UNDERLINE;
-    if (closing)
-      attroff(attribute);
-    else
-      attron(attribute);
-    textStart = html.find('>', tagStart) + 1;
+    // <b>, <i> and <u> turn bold, italic or underline on or off; any other
+    // tag, like <span> or <br>, changes nothing
+    const size_t tagEnd = html.find('>', tagStart);
+    const bool closing = html[tagStart + 1] == '/';
+    const size_t nameStart = tagStart + 1 + closing;
+    const std::string name = html.substr(
+        nameStart, html.find_first_of(" />", nameStart) - nameStart);
+    if (const attr_t attribute = attributeOf(name)) {
+      if (closing)
+        wattroff(window, attribute);
+      else
+        wattron(window, attribute);
+    }
+    if (tagEnd == std::string::npos)
+      break;
+    textStart = tagEnd + 1;
   }
-  attrset(A_NORMAL);
+  wattrset(window, A_NORMAL);
 }

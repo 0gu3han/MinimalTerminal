@@ -1,9 +1,13 @@
 module;
+#include <array>
+#include <memory>
 #include <ncurses.h>
+#include <optional>
 #include <string>
 #include <vector>
 
 export module slide;
+import layout;
 
 /// An opening tag and the content up to its closing tag
 export struct Element {
@@ -13,32 +17,44 @@ export struct Element {
   size_t contentEnd;
 };
 
-/// Every element with one of the tags, in the order they are written
+/// Every element with one of the tags, in the order they are written. Throws
+/// std::runtime_error if one is missing its > or its closing tag.
 export std::vector<Element> findAll(const std::string &html,
                                     const std::vector<std::string> &tags);
 
-/// One row of the slide and how to draw it
-struct Line {
-  std::string text;
-  attr_t style;
-  int column;
+struct WindowDeleter {
+  void operator()(WINDOW *window) const { delwin(window); }
 };
+
+/// A curses window that is deleted when it goes out of scope
+export using Window = std::unique_ptr<WINDOW, WindowDeleter>;
+
+/// A window covering the rect, or none if the rect is empty or off the screen
+export Window windowFor(const Rect &rect);
+
+/// Draw the blocks in the window, laid out to fit it
+export void drawBlocks(WINDOW *window, const std::vector<Block> &blocks);
 
 export class Slide {
 public:
   /// html is everything inside the slide's article
-  Slide(const std::string &html, size_t sourceStart = 0);
+  /// @param sourceStart Where html starts in the file, to save edited code
+  /// @param layout From the article's class
+  Slide(const std::string &html, size_t sourceStart = 0,
+        LayoutType layout = LayoutType::TitleAndContent);
 
-  /// @brief  Write the content of the slide to the terminal window
-  void render();
+  /// Draw each area of the slide in its own window, sized for the screen.
+  /// The windows are only copied to the screen, so call doupdate() after.
+  void render() const;
 
   /// Whether the slide has a code block to edit
-  bool hasCode() const { return hasCodeBlock; }
+  bool hasCode() const { return editable.has_value(); }
 
-  /// @brief  Let the user type in the code until Esc keeps the changes or
-  /// Ctrl-X undoes them
-  /// @return Whether the changes were kept
-  bool edit();
+  /// The lines of the code block to edit
+  const std::vector<std::string> &codeLines() const;
+
+  /// Replace the code block's lines, after they were edited
+  void setCode(std::vector<std::string> lines);
 
   /// The code as it goes inside <code>, starting with a line break
   std::string codeHTML() const;
@@ -56,22 +72,27 @@ public:
   bool showsOutput() const { return isOutput; }
 
 private:
-  std::vector<Line> lines;
-  /// The lines of the slide's code block as they show on screen, so they can
-  /// be edited
-  std::vector<std::string> code;
-  bool hasCodeBlock = false;
+  /// Which block holds the code to edit
+  struct BlockIndex {
+    size_t column;
+    size_t block;
+  };
+
+  LayoutType layout;
+  std::string title;
+  std::string titleTag;
+  /// The <h2> under the title of a subsection slide
+  std::string subtitle;
+  std::string subtitleTag;
+  /// The bullets, code and output of each area. Only TwoContent uses the
+  /// second one.
+  std::array<std::vector<Block>, 2> columns;
+  std::optional<BlockIndex> editable;
   size_t codeSourceStart = std::string::npos;
   size_t codeSourceEnd = std::string::npos;
-  /// The screen row of the first code line, set when the code is drawn
-  int codeRow = 0;
-  size_t codeViewportRow = 0;
-  size_t codeViewportColumn = 0;
   std::string language;
   bool isOutput = false;
 
-  void addCode(const std::string &html);
-  void addReadOnlyCode(const std::string &html);
-  void addOutput(const std::string &html);
-  void drawCode();
+  void addBlocks(const std::string &html, size_t sourceStart, size_t column);
+  void addBlock(const Element &element, size_t sourceStart, size_t column);
 };
