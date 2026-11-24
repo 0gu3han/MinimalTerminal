@@ -9,18 +9,20 @@ module;
 export module slide;
 import layout;
 
-/// An opening tag and the content up to its closing tag
+/// An element's tag name, its opening tag and the content up to its closing tag
 export struct Element {
+  std::string name;
   std::string openingTag;
   std::string content;
   size_t contentStart;
   size_t contentEnd;
 };
 
-/// Every element with one of the tags, in the order they are written. Throws
-/// std::runtime_error if one is missing its > or its closing tag.
+/// Every element with one of the tag names, in the order they are written,
+/// skipping the elements inside them. Throws std::runtime_error if one is not
+/// closed.
 export std::vector<Element> findAll(const std::string &html,
-                                    const std::vector<std::string> &tags);
+                                    const std::vector<std::string> &names);
 
 struct WindowDeleter {
   void operator()(WINDOW *window) const { delwin(window); }

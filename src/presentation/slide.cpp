@@ -13,28 +13,25 @@ import layout;
 import styler;
 
 std::vector<Element> findAll(const std::string &html,
-                             const std::vector<std::string> &tags) {
+                             const std::vector<std::string> &names) {
   std::vector<Element> elements;
   for (size_t start = html.find('<'); start != std::string::npos;
-       start = html.find('<', start + 1))
-    for (const std::string &tag : tags)
-      // check if one of the tags opens here
-      if (html.compare(start + 1, tag.size(), tag) == 0) {
-        const size_t tagEnd = html.find('>', start);
-        if (tagEnd == std::string::npos)
-          throw std::runtime_error("<" + tag + " is missing its >");
-        const size_t contentStart = tagEnd + 1;
-        const size_t closing = html.find("</" + tag + ">", contentStart);
-        if (closing == std::string::npos)
-          throw std::runtime_error("<" + tag + "> is missing its </" + tag +
-                                   ">");
-        elements.push_back({html.substr(start, contentStart - start),
-                            html.substr(contentStart, closing - contentStart),
-                            contentStart, closing});
-        // jump past the content so tags inside it are not matched
-        start = closing;
-        break;
-      }
+       start = html.find('<', start + 1)) {
+    const std::string name =
+        html.substr(start + 1, html.find_first_of(" >", start) - start - 1);
+    if (!std::ranges::contains(names, name))
+      continue;
+
+    const size_t tagEnd = html.find('>', start);
+    const size_t closing = html.find("</" + name + ">", tagEnd);
+    if (closing == std::string::npos)
+      throw std::runtime_error("<" + name + "> is missing its </" + name + ">");
+    elements.push_back({name, html.substr(start, tagEnd + 1 - start),
+                        html.substr(tagEnd + 1, closing - tagEnd - 1),
+                        tagEnd + 1, closing});
+    // jump past the content so tags inside it are not matched
+    start = closing;
+  }
   return elements;
 }
 
