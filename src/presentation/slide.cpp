@@ -51,9 +51,9 @@ Window windowAt(int row, int column, int height, int width) {
   return Window(derwin(stdscr, height, width, row, column));
 }
 
-// the decoded lines of a code block, without the line breaks right after
-// <code> and right before </code>
-static std::vector<std::string> splitCode(const std::string &html) {
+// the decoded lines of code or output, without the line break after its
+// opening tag and the indent before its closing tag
+static std::vector<std::string> splitLines(const std::string &html) {
   std::string text = decodeEntities(html);
   const bool startsWithBoundary = !text.empty() && text.front() == '\n';
   if (startsWithBoundary)
@@ -76,19 +76,6 @@ static std::vector<std::string> splitCode(const std::string &html) {
   }
   result.push_back(text.substr(start));
   return result;
-}
-
-// the decoded lines between <output> and </output>, skipping the line break
-// after <output> and the indent before </output>
-static std::vector<std::string> outputLines(const std::string &html) {
-  std::vector<std::string> lines;
-  size_t start = html.find('\n') + 1;
-  size_t end;
-  while ((end = html.find('\n', start)) != std::string::npos) {
-    lines.push_back(decodeEntities(html.substr(start, end - start)));
-    start = end + 1;
-  }
-  return lines;
 }
 
 // "cpp" from <code class="language-cpp">, or empty if there is none
@@ -326,10 +313,10 @@ void Slide::addBlock(const Element &element, size_t sourceStart,
       codeSourceEnd = contentStart + code.contentEnd;
       language = languageOf(code.openingTag);
     }
-    blocks.push_back({"pre", code.openingTag, splitCode(code.content)});
+    blocks.push_back({"pre", code.openingTag, splitLines(code.content)});
   } else if (element.name == "output") {
     isOutput = true;
-    blocks.push_back({"output", "", outputLines(element.content)});
+    blocks.push_back({"output", "", splitLines(element.content)});
   } else if (element.name == "table") {
     Block table{"table"};
     for (const Element &row : findAll(element.content, {"tr"}))
