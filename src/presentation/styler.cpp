@@ -70,44 +70,14 @@ attr_t colorOf(const std::string &openingTag) {
   return A_NORMAL;
 }
 
-// the style a tag name turns on, or none if it does not style text
-static attr_t attributeOf(const std::string &name) {
+attr_t attributeOf(const std::string &name) {
   if (name == "b" || name == "strong")
     return A_BOLD;
-  if (name == "i" || name == "em")
+  if (name == "i" || name == "em" || name == "var" || name == "dfn")
     return A_ITALIC;
   if (name == "u")
     return A_UNDERLINE;
+  if (name == "small")
+    return A_DIM;
   return A_NORMAL;
-}
-
-void drawStyled(WINDOW *window, const std::string &html, attr_t style) {
-  wattrset(window, style);
-  for (size_t textStart = 0; textStart < html.size();) {
-    size_t tagStart = html.find('<', textStart);
-    // text between tags has no tags in it, so it is safe to decode
-    waddstr(
-        window,
-        decodeEntities(html.substr(textStart, tagStart - textStart)).c_str());
-    if (tagStart == std::string::npos)
-      break;
-
-    // <b>, <i> and <u> turn bold, italic or underline on or off; any other
-    // tag, like <span> or <br>, changes nothing
-    const size_t tagEnd = html.find('>', tagStart);
-    const bool closing = html[tagStart + 1] == '/';
-    const size_t nameStart = tagStart + 1 + closing;
-    const std::string name = html.substr(
-        nameStart, html.find_first_of(" />", nameStart) - nameStart);
-    if (const attr_t attribute = attributeOf(name)) {
-      if (closing)
-        wattroff(window, attribute);
-      else
-        wattron(window, attribute);
-    }
-    if (tagEnd == std::string::npos)
-      break;
-    textStart = tagEnd + 1;
-  }
-  wattrset(window, A_NORMAL);
 }

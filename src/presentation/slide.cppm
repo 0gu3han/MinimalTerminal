@@ -7,20 +7,21 @@ module;
 #include <vector>
 
 export module slide;
-import layout;
 
-/// An opening tag and the content up to its closing tag
+/// An element's tag name, its opening tag and the content up to its closing tag
 export struct Element {
+  std::string name;
   std::string openingTag;
   std::string content;
   size_t contentStart;
   size_t contentEnd;
 };
 
-/// Every element with one of the tags, in the order they are written. Throws
-/// std::runtime_error if one is missing its > or its closing tag.
+/// Every element with one of the tag names, in the order they are written,
+/// skipping the elements inside them. Throws std::runtime_error if one is not
+/// closed.
 export std::vector<Element> findAll(const std::string &html,
-                                    const std::vector<std::string> &tags);
+                                    const std::vector<std::string> &names);
 
 struct WindowDeleter {
   void operator()(WINDOW *window) const { delwin(window); }
@@ -29,22 +30,32 @@ struct WindowDeleter {
 /// A curses window that is deleted when it goes out of scope
 export using Window = std::unique_ptr<WINDOW, WindowDeleter>;
 
-/// A window covering the rect, or none if the rect is empty or off the screen
-export Window windowFor(const Rect &rect);
+/// A part of the screen to draw in, or none if it is empty
+export Window windowAt(int row, int column, int height, int width);
 
-/// Draw the blocks in the window, laid out to fit it
-export void drawBlocks(WINDOW *window, const std::vector<Block> &blocks);
+/// A paragraph, bullet, code block or other piece of a slide
+struct Block {
+  /// The tag name, like "li" or "pre"
+  std::string name;
+  /// The opening tag, for its color and the code's language
+  std::string openingTag{};
+  /// The lines of code, output or table rows, or the one line of HTML of
+  /// anything else
+  std::vector<std::string> lines{};
+  /// What goes in front of a list item, like • or 1.
+  std::string marker{};
+};
 
 export class Slide {
 public:
   /// html is everything inside the slide's article
   /// @param sourceStart Where html starts in the file, to save edited code
-  /// @param layout From the article's class
+  /// @param twoColumns Whether the first <section> goes on the left and the
+  /// rest on the right
   Slide(const std::string &html, size_t sourceStart = 0,
-        LayoutType layout = LayoutType::TitleAndContent);
+        bool twoColumns = false);
 
-  /// Draw each area of the slide in its own window, sized for the screen.
-  /// The windows are only copied to the screen, so call doupdate() after.
+  /// Draw the slide on the screen, fitted to its size
   void render() const;
 
   /// Whether the slide has a code block to edit
@@ -58,9 +69,6 @@ public:
 
   /// The code as it goes inside <code>, starting with a line break
   std::string codeHTML() const;
-
-  /// The code as plain text, to run it
-  std::string codeText() const;
 
   size_t codeStart() const { return codeSourceStart; }
   size_t codeEnd() const { return codeSourceEnd; }
@@ -78,14 +86,12 @@ private:
     size_t block;
   };
 
-  LayoutType layout;
+  bool twoColumns;
+  /// How many sections were added, so two columns put the first on the left
+  size_t sections = 0;
   std::string title;
   std::string titleTag;
-  /// The <h2> under the title of a subsection slide
-  std::string subtitle;
-  std::string subtitleTag;
-  /// The bullets, code and output of each area. Only TwoContent uses the
-  /// second one.
+  /// The blocks of each column. Only two columns use the second one.
   std::array<std::vector<Block>, 2> columns;
   std::optional<BlockIndex> editable;
   size_t codeSourceStart = std::string::npos;
@@ -93,6 +99,7 @@ private:
   std::string language;
   bool isOutput = false;
 
-  void addBlocks(const std::string &html, size_t sourceStart, size_t column);
+  void addBlocks(const std::string &html, size_t sourceStart, size_t column,
+                 Block text);
   void addBlock(const Element &element, size_t sourceStart, size_t column);
 };

@@ -1,6 +1,7 @@
 #include <exception>
 #include <fstream>
 #include <iostream>
+#include <ncurses.h>
 #include <string>
 
 import presentation;
@@ -27,6 +28,8 @@ auto main(int argc, char *argv[]) -> int {
     file.close();
     presentation.start();
   } catch (const std::exception &error) {
+    // curses may have started, so give the terminal back before printing
+    endwin();
     std::cerr << fileName << ": " << error.what() << "\n";
     return 1;
   }

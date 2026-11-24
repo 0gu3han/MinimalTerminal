@@ -1,24 +1,14 @@
 module;
 #include <algorithm>
-#include <cerrno>
-#include <chrono>
 #include <clocale>
-#include <csignal>
 #include <cstdio>
-#include <cstdlib>
-#include <fcntl.h>
-#include <filesystem>
 #include <fstream>
 #include <ncurses.h>
-#include <poll.h>
 #include <string>
-#include <sys/wait.h>
-#include <unistd.h>
 #include <vector>
 
 module presentation;
 import editor;
-import layout;
 import styler;
 
 Presentation::Presentation(std::ifstream &file, const std::string &fileName)
@@ -41,7 +31,7 @@ void Presentation::load() {
       slides.emplace_back(article.content,
                           presentations.front().contentStart +
                               article.contentStart,
-                          layoutFromTag(article.openingTag));
+                          article.openingTag.contains("two-content"));
 
   slide = slides.begin() +
           std::min<std::ptrdiff_t>(
@@ -100,10 +90,6 @@ size_t Presentation::articleStart(std::vector<Slide>::iterator article) {
 void Presentation::save() {
   const size_t start = slide->codeStart();
   const size_t end = slide->codeEnd();
-  if (start == std::string::npos || end == std::string::npos || start > end ||
-      end > document.size())
-    return;
-
   // keep </code> on its own line with its indent if it was written that way
   const std::string old = document.substr(start, end - start);
   const size_t lastBreak = old.rfind('\n');
@@ -118,206 +104,29 @@ void Presentation::save() {
   load();
 }
 
-struct TemporaryDirectory {
-  std::filesystem::path path;
-
-  ~TemporaryDirectory() {
-    std::error_code error;
-    std::filesystem::remove_all(path, error);
-  }
-};
-
-// Write and run the code in an isolated directory, returning its output.
+// Run the code and return what it printed. The code goes in a file in /tmp
+// first, and each program gets 5 seconds of CPU time so an endless loop stops.
 static std::string run(const std::string &code, const std::string &language) {
-  TemporaryDirectory temporary;
-  std::string directoryTemplate =
-      (std::filesystem::temp_directory_path() / "dynodeck-XXXXXX").string();
-  std::vector<char> directoryName(directoryTemplate.begin(),
-                                  directoryTemplate.end());
-  directoryName.push_back('\0');
-  char *createdDirectory = mkdtemp(directoryName.data());
-  if (!createdDirectory)
-    return "Could not create temporary directory\n";
-  temporary.path = createdDirectory;
-
-  const std::string source = language == "python" ? "main.py" : "main.cpp";
-  std::ofstream sourceFile(temporary.path / source);
-  if (!sourceFile)
-    return "Could not write source file\n";
-  sourceFile << code;
-  sourceFile.close();
-  if (!sourceFile)
-    return "Could not write source file\n";
-
-  int outputPipe[2];
-  if (pipe(outputPipe) == -1)
-    return "Could not start code\n";
-
-  const auto deadline =
-      std::chrono::steady_clock::now() + std::chrono::seconds(5);
-  const pid_t child = fork();
-  if (child == -1) {
-    close(outputPipe[0]);
-    close(outputPipe[1]);
-    return "Could not start code\n";
-  }
-  if (child == 0) {
-    close(outputPipe[0]);
-    if (setpgid(0, 0) == -1)
-      _exit(127);
-    if (dup2(outputPipe[1], STDOUT_FILENO) == -1 ||
-        dup2(outputPipe[1], STDERR_FILENO) == -1)
-      _exit(127);
-    close(outputPipe[1]);
-    const int input = open("/dev/null", O_RDONLY);
-    if (input == -1 || dup2(input, STDIN_FILENO) == -1)
-      _exit(127);
-    close(input);
-    if (chdir(temporary.path.c_str()) == -1)
-      _exit(127);
-
-    const char *command = language == "python"
-                              ? "python3 -u main.py"
-                              : "c++ -std=c++23 main.cpp -o main && ./main";
-    execl("/bin/sh", "sh", "-c", command, static_cast<char *>(nullptr));
-    _exit(127);
-  }
-
-  close(outputPipe[1]);
-  setpgid(child, child);
-  const int flags = fcntl(outputPipe[0], F_GETFL, 0);
-  if (flags == -1 || fcntl(outputPipe[0], F_SETFL, flags | O_NONBLOCK) == -1) {
-    kill(-child, SIGKILL);
-    close(outputPipe[0]);
-    while (waitpid(child, nullptr, 0) == -1 && errno == EINTR) {
-    }
-    return "Could not read code output\n";
-  }
-
-  constexpr size_t maxOutputBytes = 64 * 1024;
-  constexpr size_t maxCaptureBytes = maxOutputBytes - 128;
-  constexpr size_t maxOutputLines = 100;
+  const bool python = language == "python";
+  std::ofstream(python ? "/tmp/dynodeck.py" : "/tmp/dynodeck.cpp") << code;
+  const std::string program = python ? "python3 /tmp/dynodeck.py"
+                                     : "c++ -std=c++23 /tmp/dynodeck.cpp -o "
+                                       "/tmp/dynodeck && /tmp/dynodeck";
+  // no input, so it never waits on the keyboard, and errors and messages from
+  // the shell are read too instead of going over the slides
+  FILE *pipe = popen(("exec 2>&1 < /dev/null; (ulimit -t 5; " + program +
+                      ") || echo \"Exited with status $?\"")
+                         .c_str(),
+                     "r");
   std::string output;
-  size_t lineCount = 0;
-  bool truncated = false;
-  auto appendOutput = [&](const char *buffer, size_t length) {
-    for (size_t i = 0; i < length; ++i) {
-      if (output.size() >= maxCaptureBytes || lineCount >= maxOutputLines) {
-        truncated = true;
-        continue;
-      }
-      if (buffer[i] == '\0') {
-        if (output.size() + 2 > maxCaptureBytes) {
-          truncated = true;
-          continue;
-        }
-        output += "\\0";
-      } else {
-        output += buffer[i];
-        lineCount += buffer[i] == '\n';
-      }
-    }
-  };
-
-  bool timedOut = false;
-  bool finishedReading = false;
-  bool childExited = false;
-  bool readFailed = false;
-  int status = 0;
-  while (!finishedReading || !childExited) {
-    if (!childExited) {
-      const pid_t result = waitpid(child, &status, WNOHANG);
-      if (result == child)
-        childExited = true;
-      else if (result == -1 && errno != EINTR) {
-        readFailed = true;
-        break;
-      }
-    }
-
-    const auto now = std::chrono::steady_clock::now();
-    if (now >= deadline) {
-      timedOut = true;
-      kill(-child, SIGKILL);
-      break;
-    }
-
-    const auto remaining =
-        std::chrono::duration_cast<std::chrono::milliseconds>(deadline - now);
-    const int waitMilliseconds =
-        std::min(static_cast<int>(remaining.count()), 50);
-    pollfd descriptor{outputPipe[0],
-                      static_cast<short>(finishedReading ? 0 : POLLIN), 0};
-    int result = poll(finishedReading ? nullptr : &descriptor,
-                      finishedReading ? 0 : 1, waitMilliseconds);
-    if (result == -1 && errno == EINTR)
-      continue;
-    if (result == -1) {
-      readFailed = true;
-      kill(-child, SIGKILL);
-      break;
-    }
-    if (result == 0)
-      continue;
-
-    char buffer[4096];
-    while (true) {
-      const ssize_t count = read(outputPipe[0], buffer, sizeof buffer);
-      if (count > 0) {
-        appendOutput(buffer, static_cast<size_t>(count));
-      } else if (count == 0) {
-        finishedReading = true;
-        break;
-      } else if (errno == EINTR) {
-        continue;
-      } else if (errno != EAGAIN && errno != EWOULDBLOCK) {
-        finishedReading = true;
-        break;
-      } else {
-        break;
-      }
-    }
-  }
-
-  if (timedOut || readFailed)
-    kill(-child, SIGKILL);
-  if (timedOut || readFailed) {
-    char buffer[4096];
-    while (true) {
-      const ssize_t count = read(outputPipe[0], buffer, sizeof buffer);
-      if (count > 0)
-        appendOutput(buffer, static_cast<size_t>(count));
-      else if (count == -1 && errno == EINTR)
-        continue;
-      else
-        break;
-    }
-  }
-  close(outputPipe[0]);
-
-  if (!childExited) {
-    while (waitpid(child, &status, 0) == -1 && errno == EINTR) {
-    }
-  }
-
-  if (truncated) {
-    if (!output.empty() && output.back() != '\n')
-      output += '\n';
-    output += "Output truncated\n";
-  } else if (!output.empty() && output.back() != '\n') {
+  char buffer[256];
+  // stop reading a program that prints forever
+  while (output.size() < 10000 && fgets(buffer, sizeof buffer, pipe))
+    output += buffer;
+  pclose(pipe);
+  // so the last line of output is a whole line, like the others
+  if (!output.empty() && output.back() != '\n')
     output += '\n';
-  }
-  if (timedOut) {
-    output += "Stopped after 5 seconds\n";
-  } else if (readFailed) {
-    output += "Could not read code output\n";
-  } else if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
-    output += "Exited with status " + std::to_string(WEXITSTATUS(status)) +
-              "\n";
-  } else if (WIFSIGNALED(status)) {
-    output +=
-        "Terminated by signal " + std::to_string(WTERMSIG(status)) + "\n";
-  }
   return output;
 }
 
@@ -325,7 +134,7 @@ static bool canRun(const std::string &language) {
   return language == "cpp" || language == "python";
 }
 
-void Presentation::runCode() {
+void Presentation::runCode(const std::string &code) {
   const std::string &language = slide->codeLanguage();
   if (!canRun(language))
     return;
@@ -334,7 +143,7 @@ void Presentation::runCode() {
   clrtoeol();
   refresh();
   const std::string html = "\n        <output>\n" +
-                           encodeEntities(run(slide->codeText(), language)) +
+                           encodeEntities(run(code, language)) +
                            "        </output>\n    ";
 
   // the output goes in its own article right after the code's article,
@@ -351,70 +160,47 @@ void Presentation::runCode() {
   load();
 }
 
-// what the code printed, as an output block to draw
-static Block outputBlock(const std::string &output) {
-  Block block{BlockKind::Output, "<output>", {}};
-  size_t start = 0;
-  size_t end;
-  while ((end = output.find('\n', start)) != std::string::npos) {
-    block.lines.push_back(encodeEntities(output.substr(start, end - start)));
-    start = end + 1;
-  }
-  if (start < output.size())
-    block.lines.push_back(encodeEntities(output.substr(start)));
-  return block;
-}
-
-// a header row across the screen, like " Code (cpp) "
-static void drawBar(const Rect &area, const std::string &text) {
-  if (area.height <= 0)
-    return;
-  attrset(A_REVERSE);
-  mvhline(area.row, area.col, ' ', area.width);
-  mvaddnstr(area.row, area.col, text.c_str(), area.width);
-  attrset(A_NORMAL);
-}
-
 void Presentation::editCode() {
   const std::string &language = slide->codeLanguage();
   Editor editor(slide->codeLines(), language);
   std::string output = canRun(language)
                            ? "Press Ctrl-R to run the code\n"
                            : "Only cpp and python code can be run\n";
-  const std::string help =
-      "-- INSERT --   Ctrl-R: run   Esc: keep changes   Ctrl-X: undo changes";
+  const std::string header =
+      language.empty() ? " Code" : " Code (" + language + ")";
   curs_set(1);
 
   while (true) {
-    // the areas are worked out again each time, so a resize reflows them
-    const SplitAreas areas = splitAreas(getmaxy(stdscr), getmaxx(stdscr));
+    // the code on top and what it printed below, each under a header, with
+    // the keys on the last row. Worked out each time so a resize reflows it.
+    const int height = getmaxy(stdscr);
+    const int width = getmaxx(stdscr);
+    const int codeHeight = (height - 3) * 3 / 5;
     erase();
-    drawBar(areas.editorHeader,
-            language.empty() ? " Code" : " Code (" + language + ")");
-    drawBar(areas.outputHeader, " Output");
-    mvaddnstr(areas.status.row, areas.status.col, help.c_str(),
-              areas.status.width);
-    wnoutrefresh(stdscr);
+    attrset(A_REVERSE);
+    mvhline(0, 0, ' ', width);
+    mvaddstr(0, 0, header.c_str());
+    mvhline(codeHeight + 1, 0, ' ', width);
+    mvaddstr(codeHeight + 1, 0, " Output");
+    attrset(A_NORMAL);
+    mvaddnstr(height - 1, 0,
+              "-- INSERT --   Ctrl-R: run   Esc: keep changes   Ctrl-X: "
+              "undo changes",
+              width);
+    const Window outputArea =
+        windowAt(codeHeight + 2, 0, height - codeHeight - 3, width);
+    waddstr(outputArea.get(), output.c_str());
+    // the code goes last so the cursor ends up in it
+    const Window code = windowAt(1, 0, codeHeight, width);
+    keypad(code.get(), TRUE);
+    editor.draw(code.get());
+    refresh();
 
-    if (const Window outputWindow = windowFor(areas.output)) {
-      drawBlocks(outputWindow.get(), {outputBlock(output)});
-      wnoutrefresh(outputWindow.get());
-    }
-    // the editor goes last so the cursor ends up in it
-    const Window editorWindow = windowFor(areas.editor);
-    if (editorWindow) {
-      keypad(editorWindow.get(), TRUE);
-      editor.draw(editorWindow.get());
-      wnoutrefresh(editorWindow.get());
-    }
-    doupdate();
-
-    const int key = editorWindow ? wgetch(editorWindow.get()) : getch();
-    switch (key) {
+    switch (const int key = code ? wgetch(code.get()) : getch()) {
     case 27: // Esc
       slide->setCode(editor.lines());
       save();
-      runCode();
+      runCode(editor.text());
       curs_set(0);
       return;
     case 24: // Ctrl-X
@@ -422,8 +208,7 @@ void Presentation::editCode() {
       return;
     case 18: // Ctrl-R
       if (canRun(language)) {
-        mvaddnstr(areas.status.row, areas.status.col, "Running...",
-                  areas.status.width);
+        mvaddnstr(height - 1, 0, "Running...", width);
         clrtoeol();
         refresh();
         output = run(editor.text(), language);
@@ -441,6 +226,8 @@ void Presentation::editCode() {
 
 void Presentation::render() {
   erase();
+  if (!is_hidden)
+    slide->render();
 
   // the slide counter in the bottom right corner
   const std::string counter =
@@ -449,11 +236,5 @@ void Presentation::render() {
   mvaddstr(getmaxy(stdscr) - 1,
            std::max(getmaxx(stdscr) - static_cast<int>(counter.size()) - 1, 0),
            counter.c_str());
-  // the screen goes first so the slide's windows are drawn over it
-  wnoutrefresh(stdscr);
-
-  if (!is_hidden)
-    slide->render();
-
-  doupdate();
+  refresh();
 }
