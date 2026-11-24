@@ -19,7 +19,7 @@ const int columnGap = 4;
 // the tags that are blocks of their own. Others, like <ul> and <div>, are only
 // looked inside.
 static const std::vector<std::string> blockNames = {
-    "h1", "h2", "h3", "h4", "p", "li", "dt", "dd", "figcaption",
+    "h1", "h2", "h3", "h4", "p", "li", "dl", "figcaption",
     "ol", "table", "pre", "output", "section"};
 
 std::vector<Element> findAll(const std::string &html,
@@ -232,21 +232,15 @@ static bool drawTable(WINDOW *window, int &row, const Block &table) {
   return true;
 }
 
-// a paragraph, bullet or other block of text, with its marker. Headings and
-// the terms of a definition list are bold, and definitions are indented.
+// a paragraph, bullet or other block of text, with its marker. Headings are
+// bold.
 static bool drawBlock(WINDOW *window, int &row, const Block &block) {
-  const bool bold = block.name.starts_with('h') || block.name == "dt";
-  const attr_t style = (bold ? A_BOLD : A_NORMAL) | colorOf(block.openingTag);
-  const int indent = block.name == "dd"      ? 4
-                     : block.marker.empty() ? 0
-                                            : textWidth(block.marker) + 1;
+  const attr_t style = (block.name.starts_with('h') ? A_BOLD : A_NORMAL) |
+                       colorOf(block.openingTag);
+  const int indent = block.marker.empty() ? 0 : textWidth(block.marker) + 1;
   wattrset(window, style);
   mvwaddstr(window, row, 0, block.marker.c_str());
   return drawText(window, row, indent, block.lines.front(), style);
-}
-
-static bool isListItem(const Block &block) {
-  return block.name == "li" || block.name == "dt" || block.name == "dd";
 }
 
 // the blocks from the top of the window down, with a blank row between them
@@ -255,7 +249,7 @@ static void drawBlocks(const Window &window, const std::vector<Block> &blocks) {
   int row = 0;
   for (size_t i = 0; i < blocks.size(); ++i) {
     const Block &block = blocks[i];
-    if (i > 0 && !(isListItem(block) && isListItem(blocks[i - 1])))
+    if (i > 0 && !(block.name == "li" && blocks[i - 1].name == "li"))
       ++row;
     const bool fits = block.name == "pre"      ? drawCode(window.get(), row, block)
                       : block.name == "output" ? drawOutput(window.get(), row, block)
@@ -328,6 +322,27 @@ void Slide::addBlock(const Element &element, size_t sourceStart,
     for (const Element &item : findAll(element.content, {"li"}))
       addBlocks(item.content, contentStart + item.contentStart, column,
                 {"li", item.openingTag, {}, std::to_string(++number) + "."});
+  } else if (element.name == "dl") {
+    // each definition is a bullet after its terms, like "• A, B, and C: ...",
+    // and another definition of the same terms goes on the line under it
+    std::vector<std::string> terms;
+    for (const Element &item : findAll(element.content, {"dt", "dd"})) {
+      if (item.name == "dt") {
+        terms.push_back("<b>" + item.content + "</b>");
+        continue;
+      }
+      std::string text = terms.empty() ? "" : terms.front();
+      for (size_t i = 1; i < terms.size(); ++i)
+        text += (i + 1 < terms.size()  ? ", "
+                 : terms.size() == 2 ? " and "
+                                     : ", and ") +
+                terms[i];
+      blocks.push_back(
+          {"li", item.openingTag,
+           {terms.empty() ? item.content : text + ": " + item.content},
+           terms.empty() ? " " : "•"});
+      terms.clear();
+    }
   } else if (element.name == "section")
     // two columns put the first section on the left and the rest on the right
     addBlocks(element.content, contentStart,
