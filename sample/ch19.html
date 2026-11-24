@@ -65,7 +65,7 @@
             </ul>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>array&lt;int, 5&gt; numbers = {10, 20, 30, 40, 50};
+                <pre><code class="language-cpp">array&lt;int, 5&gt; numbers = {10, 20, 30, 40, 50};
 cout << numbers.at(0) << endl;    // Safe access
 numbers.fill(99);                 // Set all to 99</code></pre>
             </div>
@@ -105,7 +105,7 @@ numbers.fill(99);                 // Set all to 99</code></pre>
             </dl>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>vector&lt;string&gt; names = {"Alice", "Elana", "Yuki"};
+                <pre><code class="language-cpp">vector&lt;string&gt; names = {"Alice", "Elana", "Yuki"};
 auto it = names.begin();
 cout << *it;             // Displays "Alice"
 it++;                    // Move to next element</code></pre>
@@ -123,7 +123,7 @@ it++;                    // Move to next element</code></pre>
             </ul>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>array&lt;string, 3&gt; cities = {"Tokyo", "Paris", "Mumbai"};
+                <pre><code class="language-cpp">array&lt;string, 3&gt; cities = {"Tokyo", "Paris", "Mumbai"};
 for (auto it = cities.cbegin(); it != cities.cend(); it++)
 {
     cout << *it << endl;    // OK - reading
@@ -146,7 +146,7 @@ for (auto it = cities.cbegin(); it != cities.cend(); it++)
             </dl>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>vector&lt;int&gt; numbers = {1, 2, 3, 4, 5};
+                <pre><code class="language-cpp">vector&lt;int&gt; numbers = {1, 2, 3, 4, 5};
 // Display in reverse order
 for (auto it = numbers.rbegin(); it != numbers.rend(); it++)
 {
@@ -168,7 +168,7 @@ for (auto it = numbers.rbegin(); it != numbers.rend(); it++)
             </ul>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>vector&lt;int&gt; numbers = {1, 2, 3};
+                <pre><code class="language-cpp">vector&lt;int&gt; numbers = {1, 2, 3};
 numbers.push_back(4);     // Add to end
 cout << numbers.size();   // Output: 4</code></pre>
             </div>
@@ -217,7 +217,7 @@ cout << numbers.size();   // Output: 4</code></pre>
             </dl>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>map&lt;int, string&gt; employees;
+                <pre><code class="language-cpp">map&lt;int, string&gt; employees;
 employees[101] = "Alice";
 employees[102] = "Elana";</code></pre>
             </div>
@@ -237,7 +237,7 @@ employees[102] = "Elana";</code></pre>
             </dl>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>map&lt;int, string&gt; employees = {{101, "Alice"}, {102, "Elana"}};
+                <pre><code class="language-cpp">map&lt;int, string&gt; employees = {{101, "Alice"}, {102, "Elana"}};
 
 // Access using []
 cout << employees[101];      // "Alice"
@@ -260,7 +260,7 @@ if (employees.count(103) > 0)
             </ul>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>map&lt;int, string&gt; employees = {{101, "Alice"}, {102, "Elana"}};
+                <pre><code class="language-cpp">map&lt;int, string&gt; employees = {{101, "Alice"}, {102, "Elana"}};
 
 for (auto it = employees.begin(); it != employees.end(); it++)
 {
@@ -281,7 +281,7 @@ for (auto it = employees.begin(); it != employees.end(); it++)
             </dl>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>map&lt;int, string&gt; employees;
+                <pre><code class="language-cpp">map&lt;int, string&gt; employees;
 // Insert elements
 employees.insert({101, "Alice"});
 employees.insert(make_pair(102, "Elana"));
@@ -333,7 +333,7 @@ cout << employees.size();                  // Output: 2</code></pre>
             </ul>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>set&lt;int&gt; numbers;
+                <pre><code class="language-cpp">set&lt;int&gt; numbers;
 numbers.insert(10);
 numbers.insert(20);
 numbers.insert(10);     // Ignored - duplicate
@@ -355,7 +355,7 @@ cout << numbers.size(); // Output: 2</code></pre>
             </dl>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>set&lt;int&gt; numbers = {10, 20, 30, 40, 50};
+                <pre><code class="language-cpp">set&lt;int&gt; numbers = {10, 20, 30, 40, 50};
 
 // Using find()
 auto it = numbers.find(30);
@@ -380,7 +380,7 @@ if (numbers.contains(30))
             </dl>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>set&lt;int&gt; numbers = {10, 20, 30, 40, 50};
+                <pre><code class="language-cpp">set&lt;int&gt; numbers = {10, 20, 30, 40, 50};
 
 // Remove by value
 numbers.erase(30);
@@ -417,7 +417,7 @@ cout << numbers.size(); // Output: 3</code></pre>
             </dl>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>tuple&lt;int, string, double&gt; student(101, "Alice", 3.85);
+                <pre><code class="language-cpp">tuple&lt;int, string, double&gt; student(101, "Alice", 3.85);
 cout << get<0>(student);    // Displays 101
 cout << get<1>(student);    // Displays Alice</code></pre>
             </div>
@@ -428,20 +428,20 @@ cout << get<1>(student);    // Displays Alice</code></pre>
             <ol>
                 <li>
                     Using <code>make_tuple</code>
-                    <pre><code>tuple&lt;int, string, double&gt; itemTuple;
+                    <pre><code class="language-cpp">tuple&lt;int, string, double&gt; itemTuple;
 itemTuple = make_tuple(123, "USB Cable", 8.99);</code></pre>
                 </li>
                 <li>
                     Constructor Initialization
-                    <pre><code>tuple&lt;int, int, int&gt; nums(10, 20, 30);</code></pre>
+                    <pre><code class="language-cpp">tuple&lt;int, int, int&gt; nums(10, 20, 30);</code></pre>
                 </li>
                 <li>
                     Using <code>auto</code> with <code>make_tuple</code>
-                    <pre><code>auto gradeTuple = make_tuple(97, 'A');</code></pre>
+                    <pre><code class="language-cpp">auto gradeTuple = make_tuple(97, 'A');</code></pre>
                 </li>
                 <li>
                     Braced Initialization <small>(C++11)</small>
-                    <pre><code>tuple<string, int, double> info {"Maria Lopez", 21, 3.85};</code></pre>
+                    <pre><code class="language-cpp">tuple<string, int, double> info {"Maria Lopez", 21, 3.85};</code></pre>
                 </li>
             </ol>
             <p><b>Tip:</b> When using <code>auto</code> with <code>make_tuple</code>, the compiler automatically deduces
@@ -453,7 +453,7 @@ itemTuple = make_tuple(123, "USB Cable", 8.99);</code></pre>
                 at 0.</p>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>tuple&lt;int, string, double&gt; itemTuple(123, "USB Cable", 8.99);
+                <pre><code class="language-cpp">tuple&lt;int, string, double&gt; itemTuple(123, "USB Cable", 8.99);
 
 int itemNumber = get&lt;0&gt;(itemTuple);      // 123
 string itemName = get&lt;1&gt;(itemTuple);     // "USB Cable"
@@ -491,7 +491,7 @@ cout << get&lt;1&gt;(itemTuple) << endl;       // Displays: USB Cable</code></pr
                 instead of the index.</p>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>tuple&lt;int, string, double&gt; itemTuple(123, "USB Cable", 8.99);
+                <pre><code class="language-cpp">tuple&lt;int, string, double&gt; itemTuple(123, "USB Cable", 8.99);
 
 string itemName = get&lt;string&gt;(itemTuple);    // "USB Cable"
 cout << get&lt;double&gt;(itemTuple) << endl;      // Displays: 8.99</code></pre>
@@ -500,7 +500,7 @@ cout << get&lt;double&gt;(itemTuple) << endl;      // Displays: 8.99</code></pre
             <p>If more than one value has the same type, you cannot retrieve by type. Use the index instead.</p>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>tuple&lt;int, int, int, double&gt; nums(1, 2, 3, 4.5);
+                <pre><code class="language-cpp">tuple&lt;int, int, int, double&gt; nums(1, 2, 3, 4.5);
 cout << get&lt;int&gt;(nums) << endl;       // ERROR! Multiple ints
 cout << get&lt;double&gt;(nums) << endl;    // OK: only one double</code></pre>
             </div>
@@ -513,7 +513,7 @@ cout << get&lt;double&gt;(nums) << endl;    // OK: only one double</code></pre>
                 <figcaption>Modify by Index</figcaption>
                 <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                     <meta itemprop="programmingLanguage" content="cpp" />
-                    <pre><code>tuple&lt;int, int, int&gt; nums(1, 2, 3);
+                    <pre><code class="language-cpp">tuple&lt;int, int, int&gt; nums(1, 2, 3);
 get<2>(nums) = 99;
 // nums now contains: 1, 2, 99</code></pre>
                 </div>
@@ -522,7 +522,7 @@ get<2>(nums) = 99;
                 <figcaption>Modify by Type</figcaption>
                 <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                     <meta itemprop="programmingLanguage" content="cpp" />
-                    <pre><code>auto grade = make_tuple(90, 'A');
+                    <pre><code class="language-cpp">auto grade = make_tuple(90, 'A');
 get<char>(grade) = 'B';
 // grade now contains: 90, 'B'</code></pre>
                 </div>
@@ -531,7 +531,7 @@ get<char>(grade) = 'B';
             You can assign one tuple to another if they have the same number and types of elements:
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>tuple&lt;int, int, int&gt; numbers1(1, 2, 3);
+                <pre><code class="language-cpp">tuple&lt;int, int, int&gt; numbers1(1, 2, 3);
 tuple&lt;int, int, int&gt; numbers2;
 numbers2 = numbers1;    // numbers2 now holds: 1, 2, 3</code></pre>
             </div>
@@ -543,7 +543,7 @@ numbers2 = numbers1;    // numbers2 now holds: 1, 2, 3</code></pre>
                 tuples.</p>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>tuple&lt;int, int, int&gt; numbers1(1, 2, 3);
+                <pre><code class="language-cpp">tuple&lt;int, int, int&gt; numbers1(1, 2, 3);
 tuple&lt;int, int, int&gt; numbers2(4, 5, 6);
 
 numbers1.swap(numbers2);</code></pre>
@@ -582,7 +582,7 @@ numbers1.swap(numbers2);</code></pre>
             </p>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>tuple&lt;int, char&gt; gradeTuple(90, 'A');
+                <pre><code class="language-cpp">tuple&lt;int, char&gt; gradeTuple(90, 'A');
 int testScore;
 char grade;
 tie(testScore, grade) = gradeTuple;
@@ -592,7 +592,7 @@ tie(testScore, grade) = gradeTuple;
             <p>Pass <code>ignore</code> as an argument to skip values you don't need:</p>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>tuple&lt;int, string, double&gt; itemTuple(123, "USB Cable", 8.99);
+                <pre><code class="language-cpp">tuple&lt;int, string, double&gt; itemTuple(123, "USB Cable", 8.99);
 int itemNumber;
 string itemName;
 tie(itemNumber, itemName, ignore) = itemTuple;
@@ -606,14 +606,14 @@ tie(itemNumber, itemName, ignore) = itemTuple;
             </p>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>tuple&lt;int, int, int&gt; numbers(1, 2, 3);
+                <pre><code class="language-cpp">tuple&lt;int, int, int&gt; numbers(1, 2, 3);
 auto [num1, num2, num3] = numbers;
 // num1 is 1, num2 is 2, num3 is 3</code></pre>
             </div>
             <p>Works with tuples of different types:</p>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>tuple&lt;string, int, double&gt; studentInfo{"Mateo", 20, 3.9};
+                <pre><code class="language-cpp">tuple&lt;string, int, double&gt; studentInfo{"Mateo", 20, 3.9};
 auto [name, age, gpa] = studentInfo;
 
 cout << name << " is " << age << " years old with a GPA of " << gpa << endl;</code></pre>
@@ -628,7 +628,7 @@ cout << name << " is " << age << " years old with a GPA of " << gpa << endl;</co
             </p>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>tuple&lt;int, int, int&gt; getTestScores()
+                <pre><code class="language-cpp">tuple&lt;int, int, int&gt; getTestScores()
 {
     int score1, score2, score3;
     cout << "Enter three test scores: ";
@@ -639,7 +639,7 @@ cout << name << " is " << age << " years old with a GPA of " << gpa << endl;</co
             <p>Calling the function and unpacking the result:</p>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>// Using structured binding (simplest)
+                <pre><code class="language-cpp">// Using structured binding (simplest)
 auto [test1, test2, test3] = getTestScores();
 
 // Using tie
@@ -655,7 +655,7 @@ tie(t1, t2, t3) = getTestScores();</code></pre>
             </p>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>tuple&lt;int, string&gt; student1(85, "Ahmed Hassan");
+                <pre><code class="language-cpp">tuple&lt;int, string&gt; student1(85, "Ahmed Hassan");
 tuple&lt;int, string&gt; student2(90, "Lisa Chen");
 tuple&lt;int, string&gt; student3(85, "Ahmed Hassan");
 
@@ -680,7 +680,7 @@ if (student2 > student1)
             </p>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>tuple&lt;int, string&gt; first(99, "Hello");
+                <pre><code class="language-cpp">tuple&lt;int, string&gt; first(99, "Hello");
 tuple&lt;double, char&gt; second(3.14, 'A');
 
 auto combined = tuple_cat(first, second);
@@ -758,7 +758,7 @@ auto combined = tuple_cat(first, second);
             </ul>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>vector&lt;int&gt; values = {45, 46, 2, 47, 48, 999, 49, 50};
+                <pre><code class="language-cpp">vector&lt;int&gt; values = {45, 46, 2, 47, 48, 999, 49, 50};
 
 // Find min and max
 auto min = min_element(values.begin(), values.end());
@@ -780,7 +780,7 @@ cout << "Maximum: " << *max << endl;  // 999</code></pre>
             </dl>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>vector&lt;int&gt; numbers = {50, 10, 40, 20, 30};
+                <pre><code class="language-cpp">vector&lt;int&gt; numbers = {50, 10, 40, 20, 30};
 
 // Sort the vector
 sort(numbers.begin(), numbers.end());
@@ -803,7 +803,7 @@ if (binary_search(numbers.begin(), numbers.end(), 30))
             </dl>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>vector&lt;int&gt; numbers = {10, 20, 30, 20, 40};
+                <pre><code class="language-cpp">vector&lt;int&gt; numbers = {10, 20, 30, 20, 40};
 
 // Find first occurrence of 20
 auto it = find(numbers.begin(), numbers.end(), 20);
@@ -827,7 +827,7 @@ cout << "Found " << occurrences << " times"; // 2</code></pre>
             </dl>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>vector&lt;int&gt; numbers = {1, 7, 3, 7, 4, 7, 5};
+                <pre><code class="language-cpp">vector&lt;int&gt; numbers = {1, 7, 3, 7, 4, 7, 5};
 
 // Remove all 7s (erase-remove idiom)
 auto newEnd = remove(numbers.begin(), numbers.end(), 7);
@@ -860,7 +860,7 @@ reverse(numbers.begin(), numbers.end());
             <!-- I've omitted bolded text and an arrow here -->
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>// Function to display and modify each element
+                <pre><code class="language-cpp">// Function to display and modify each element
 void displayAndDouble(int& num)
 {
     cout << "Before: " << num << ", ";
@@ -885,7 +885,7 @@ int main()
             <p>Predicates are functions that return <code>bool</code> values, used with many algorithms:</p>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>// Predicate function - returns true if even
+                <pre><code class="language-cpp">// Predicate function - returns true if even
 bool isEven(int num)
 {
     return num % 2 == 0;
@@ -907,7 +907,7 @@ cout << "First even: " << *it << endl; // Output: 2</code></pre>
             <p>The transform algorithm applies a function to each element and stores results:</p>
             <div itemscope itemtype="https://schema.org/SoftwareSourceCode">
                 <meta itemprop="programmingLanguage" content="cpp" />
-                <pre><code>// Function to square a number
+                <pre><code class="language-cpp">// Function to square a number
 int square(int num)
 {
     return num * num;
