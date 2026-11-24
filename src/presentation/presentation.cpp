@@ -135,7 +135,7 @@ static bool canRun(const std::string &language) {
   return language == "cpp" || language == "python";
 }
 
-void Presentation::runCode() {
+void Presentation::runCode(const std::string &code) {
   const std::string &language = slide->codeLanguage();
   if (!canRun(language))
     return;
@@ -144,7 +144,7 @@ void Presentation::runCode() {
   clrtoeol();
   refresh();
   const std::string html = "\n        <output>\n" +
-                           encodeEntities(run(slide->codeText(), language)) +
+                           encodeEntities(run(code, language)) +
                            "        </output>\n    ";
 
   // the output goes in its own article right after the code's article,
@@ -201,7 +201,7 @@ void Presentation::editCode() {
     case 27: // Esc
       slide->setCode(editor.lines());
       save();
-      runCode();
+      runCode(editor.text());
       curs_set(0);
       return;
     case 24: // Ctrl-X

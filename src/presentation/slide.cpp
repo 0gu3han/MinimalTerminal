@@ -391,10 +391,3 @@ std::string Slide::codeHTML() const {
     html += "\n" + encodeEntities(line);
   return html;
 }
-
-std::string Slide::codeText() const {
-  std::string text;
-  for (const std::string &line : codeLines())
-    text += line + "\n";
-  return text;
-}

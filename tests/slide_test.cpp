@@ -53,7 +53,6 @@ static void testSetCode() {
   Slide slide("<pre><code>old</code></pre>");
   slide.setCode({"new", "a < b"});
   expect(slide.codeLines(), Lines{"new", "a < b"}, "edited lines are kept");
-  expect(slide.codeText(), std::string("new\na < b\n"), "text to run");
   expect(slide.codeHTML(), std::string("\nnew\na &lt; b"),
          "HTML to save is encoded");
 }

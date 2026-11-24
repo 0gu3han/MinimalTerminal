@@ -36,7 +36,7 @@ private:
   /// Write the current slide's code into the file
   void save();
   /// Run the current slide's code and show what it printed on the next slide
-  void runCode();
+  void runCode(const std::string &code);
   /// Edit the current slide's code with the code on top and what it printed
   /// below. Ctrl-R runs it, Esc keeps the changes and Ctrl-X throws them away.
   void editCode();

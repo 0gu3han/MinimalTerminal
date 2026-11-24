@@ -70,9 +70,6 @@ public:
   /// The code as it goes inside <code>, starting with a line break
   std::string codeHTML() const;
 
-  /// The code as plain text, to run it
-  std::string codeText() const;
-
   size_t codeStart() const { return codeSourceStart; }
   size_t codeEnd() const { return codeSourceEnd; }
 
