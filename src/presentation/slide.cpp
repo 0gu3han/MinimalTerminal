@@ -20,7 +20,7 @@ const int columnGap = 4;
 // looked inside.
 static const std::vector<std::string> blockNames = {
     "h1", "h2", "h3", "h4", "p", "li", "dt", "dd", "figcaption",
-    "pre", "output", "section"};
+    "ol", "pre", "output", "section"};
 
 std::vector<Element> findAll(const std::string &html,
                              const std::vector<std::string> &names) {
@@ -291,6 +291,12 @@ void Slide::addBlock(const Element &element, size_t sourceStart,
   } else if (element.name == "output") {
     isOutput = true;
     blocks.push_back({"output", "", outputLines(element.content)});
+  } else if (element.name == "ol") {
+    // numbered items, like 1. and 2.
+    int number = 0;
+    for (const Element &item : findAll(element.content, {"li"}))
+      addBlocks(item.content, contentStart + item.contentStart, column,
+                {"li", item.openingTag, {}, std::to_string(++number) + "."});
   } else if (element.name == "section")
     // two columns put the first section on the left and the rest on the right
     addBlocks(element.content, contentStart,
