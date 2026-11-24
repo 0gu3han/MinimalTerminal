@@ -14,10 +14,6 @@ if(NCURSESW_LIBRARY)
 endif()
 find_package(Curses REQUIRED)
 
-# layout has no curses in it, so the tests can use it on its own
-add_library(layout src/presentation/layout.cpp)
-target_sources(layout PUBLIC FILE_SET CXX_MODULES FILES src/presentation/layout.cppm)
-
 # everything but main, so the tests can use it too
 add_library(deck
   src/presentation/presentation.cpp
@@ -32,7 +28,7 @@ target_sources(deck PUBLIC FILE_SET CXX_MODULES FILES
   src/presentation/styler.cppm
   src/presentation/highlighter.cppm)
 target_include_directories(deck PUBLIC ${CURSES_INCLUDE_DIRS})
-target_link_libraries(deck PUBLIC layout ${CURSES_LIBRARIES})
+target_link_libraries(deck PUBLIC ${CURSES_LIBRARIES})
 
 add_executable(dynodeck src/main.cpp)
 target_link_libraries(dynodeck PRIVATE deck)
@@ -40,10 +36,6 @@ target_link_libraries(dynodeck PRIVATE deck)
 enable_testing()
 add_library(testing)
 target_sources(testing PUBLIC FILE_SET CXX_MODULES FILES tests/testing.cppm)
-
-add_executable(layout_test tests/layout_test.cpp)
-target_link_libraries(layout_test PRIVATE layout testing)
-add_test(NAME layout COMMAND layout_test)
 
 add_executable(editor_test tests/editor_test.cpp)
 target_link_libraries(editor_test PRIVATE deck testing)

@@ -2,7 +2,6 @@
 #include <string>
 #include <vector>
 
-import layout;
 import slide;
 import testing;
 
@@ -43,7 +42,7 @@ static void testTwoContent() {
 )";
   const std::string file =
       "<main><article class=\"two-content\">" + article + "</article></main>";
-  const Slide slide(article, file.find(article), LayoutType::TwoContent);
+  const Slide slide(article, file.find(article), true);
   expect(slide.codeLanguage(), std::string("python"), "code in a section");
   expect(slide.codeLines(), Lines{"print(\"right\")"}, "its lines");
   expect(savedPart(file, slide), std::string("print(\"right\")"),
@@ -64,7 +63,7 @@ static void testOutputAndNoCode() {
   expect(output.showsOutput(), true, "output slide");
   expect(output.hasCode(), false, "output is not code to edit");
 
-  const Slide plain("<h1>Just a title</h1>", 0, LayoutType::Subsection);
+  const Slide plain("<h1>Just a title</h1>");
   expect(plain.hasCode(), false, "no code");
   expect(plain.codeLines().empty(), true, "no code lines");
 }

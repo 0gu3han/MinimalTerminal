@@ -9,7 +9,6 @@ module;
 
 module presentation;
 import editor;
-import layout;
 import styler;
 
 Presentation::Presentation(std::ifstream &file, const std::string &fileName)
@@ -32,7 +31,7 @@ void Presentation::load() {
       slides.emplace_back(article.content,
                           presentations.front().contentStart +
                               article.contentStart,
-                          layoutFromTag(article.openingTag));
+                          article.openingTag.contains("two-content"));
 
   slide = slides.begin() +
           std::min<std::ptrdiff_t>(
@@ -228,6 +227,8 @@ void Presentation::editCode() {
 
 void Presentation::render() {
   erase();
+  if (!is_hidden)
+    slide->render();
 
   // the slide counter in the bottom right corner
   const std::string counter =
@@ -236,11 +237,5 @@ void Presentation::render() {
   mvaddstr(getmaxy(stdscr) - 1,
            std::max(getmaxx(stdscr) - static_cast<int>(counter.size()) - 1, 0),
            counter.c_str());
-  // the screen goes first so the slide's windows are drawn over it
-  wnoutrefresh(stdscr);
-
-  if (!is_hidden)
-    slide->render();
-
-  doupdate();
+  refresh();
 }
