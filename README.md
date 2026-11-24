@@ -17,6 +17,10 @@ picks. If nothing matches, it says so.
 When the presentation is over, the presenter can exit and optionally save it as a PDF, including any code edits and
 their output.
 
+## Font size
+Dynodeck draws text in terminal cells, so its font size is controlled by the terminal. In iTerm2, increase the font
+size in **Settings > Profiles > Text > Font**. Dynodeck lays out the slides again when the terminal is resized.
+
 ## Presentation format
 The `<main>` element holds the presentation and each `<article>` is one slide. See `sample/slides.html`.
 
