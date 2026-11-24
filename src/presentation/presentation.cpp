@@ -90,10 +90,6 @@ size_t Presentation::articleStart(std::vector<Slide>::iterator article) {
 void Presentation::save() {
   const size_t start = slide->codeStart();
   const size_t end = slide->codeEnd();
-  if (start == std::string::npos || end == std::string::npos || start > end ||
-      end > document.size())
-    return;
-
   // keep </code> on its own line with its indent if it was written that way
   const std::string old = document.substr(start, end - start);
   const size_t lastBreak = old.rfind('\n');
