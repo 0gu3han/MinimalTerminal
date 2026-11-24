@@ -124,6 +124,9 @@ static std::string run(const std::string &code, const std::string &language) {
   while (output.size() < 10000 && fgets(buffer, sizeof buffer, pipe))
     output += buffer;
   pclose(pipe);
+  // so the last line of output is a whole line, like the others
+  if (!output.empty() && output.back() != '\n')
+    output += '\n';
   return output;
 }
 
