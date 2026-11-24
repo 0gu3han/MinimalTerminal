@@ -162,66 +162,43 @@ void Presentation::runCode() {
   load();
 }
 
-// what the code printed, as an output block to draw
-static Block outputBlock(const std::string &output) {
-  Block block{BlockKind::Output, "<output>", {}};
-  size_t start = 0;
-  size_t end;
-  while ((end = output.find('\n', start)) != std::string::npos) {
-    block.lines.push_back(encodeEntities(output.substr(start, end - start)));
-    start = end + 1;
-  }
-  if (start < output.size())
-    block.lines.push_back(encodeEntities(output.substr(start)));
-  return block;
-}
-
-// a header row across the screen, like " Code (cpp) "
-static void drawBar(const Rect &area, const std::string &text) {
-  if (area.height <= 0)
-    return;
-  attrset(A_REVERSE);
-  mvhline(area.row, area.col, ' ', area.width);
-  mvaddnstr(area.row, area.col, text.c_str(), area.width);
-  attrset(A_NORMAL);
-}
-
 void Presentation::editCode() {
   const std::string &language = slide->codeLanguage();
   Editor editor(slide->codeLines(), language);
   std::string output = canRun(language)
                            ? "Press Ctrl-R to run the code\n"
                            : "Only cpp and python code can be run\n";
-  const std::string help =
-      "-- INSERT --   Ctrl-R: run   Esc: keep changes   Ctrl-X: undo changes";
+  const std::string header =
+      language.empty() ? " Code" : " Code (" + language + ")";
   curs_set(1);
 
   while (true) {
-    // the areas are worked out again each time, so a resize reflows them
-    const SplitAreas areas = splitAreas(getmaxy(stdscr), getmaxx(stdscr));
+    // the code on top and what it printed below, each under a header, with
+    // the keys on the last row. Worked out each time so a resize reflows it.
+    const int height = getmaxy(stdscr);
+    const int width = getmaxx(stdscr);
+    const int codeHeight = (height - 3) * 3 / 5;
     erase();
-    drawBar(areas.editorHeader,
-            language.empty() ? " Code" : " Code (" + language + ")");
-    drawBar(areas.outputHeader, " Output");
-    mvaddnstr(areas.status.row, areas.status.col, help.c_str(),
-              areas.status.width);
-    wnoutrefresh(stdscr);
+    attrset(A_REVERSE);
+    mvhline(0, 0, ' ', width);
+    mvaddstr(0, 0, header.c_str());
+    mvhline(codeHeight + 1, 0, ' ', width);
+    mvaddstr(codeHeight + 1, 0, " Output");
+    attrset(A_NORMAL);
+    mvaddnstr(height - 1, 0,
+              "-- INSERT --   Ctrl-R: run   Esc: keep changes   Ctrl-X: "
+              "undo changes",
+              width);
+    const Window outputArea =
+        windowAt(codeHeight + 2, 0, height - codeHeight - 3, width);
+    waddstr(outputArea.get(), output.c_str());
+    // the code goes last so the cursor ends up in it
+    const Window code = windowAt(1, 0, codeHeight, width);
+    keypad(code.get(), TRUE);
+    editor.draw(code.get());
+    refresh();
 
-    if (const Window outputWindow = windowFor(areas.output)) {
-      drawBlocks(outputWindow.get(), {outputBlock(output)});
-      wnoutrefresh(outputWindow.get());
-    }
-    // the editor goes last so the cursor ends up in it
-    const Window editorWindow = windowFor(areas.editor);
-    if (editorWindow) {
-      keypad(editorWindow.get(), TRUE);
-      editor.draw(editorWindow.get());
-      wnoutrefresh(editorWindow.get());
-    }
-    doupdate();
-
-    const int key = editorWindow ? wgetch(editorWindow.get()) : getch();
-    switch (key) {
+    switch (const int key = code ? wgetch(code.get()) : getch()) {
     case 27: // Esc
       slide->setCode(editor.lines());
       save();
@@ -233,8 +210,7 @@ void Presentation::editCode() {
       return;
     case 18: // Ctrl-R
       if (canRun(language)) {
-        mvaddnstr(areas.status.row, areas.status.col, "Running...",
-                  areas.status.width);
+        mvaddnstr(height - 1, 0, "Running...", width);
         clrtoeol();
         refresh();
         output = run(editor.text(), language);

@@ -99,6 +99,12 @@ Window windowFor(const Rect &rect) {
   return Window(newwin(rect.height, rect.width, rect.row, rect.col));
 }
 
+Window windowAt(int row, int column, int height, int width) {
+  if (height <= 0 || width <= 0)
+    return nullptr;
+  return Window(derwin(stdscr, height, width, row, column));
+}
+
 // a row of code on its grey box, highlighted, with … if it was cut off
 static void drawCode(WINDOW *window, int screenRow, const Row &row,
                      const std::vector<attr_t> &styles) {

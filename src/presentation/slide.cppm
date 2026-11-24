@@ -34,6 +34,9 @@ export using Window = std::unique_ptr<WINDOW, WindowDeleter>;
 /// A window covering the rect, or none if the rect is empty or off the screen
 export Window windowFor(const Rect &rect);
 
+/// A part of the screen to draw in, or none if it is empty
+export Window windowAt(int row, int column, int height, int width);
+
 /// Draw the blocks in the window, laid out to fit it
 export void drawBlocks(WINDOW *window, const std::vector<Block> &blocks);
 
