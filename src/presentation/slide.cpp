@@ -19,7 +19,8 @@ const int columnGap = 4;
 // the tags that are blocks of their own. Others, like <ul> and <div>, are only
 // looked inside.
 static const std::vector<std::string> blockNames = {
-    "h1", "h2", "li", "pre", "output", "section"};
+    "h1", "h2", "h3", "h4", "p", "li", "dt", "dd", "figcaption",
+    "pre", "output", "section"};
 
 std::vector<Element> findAll(const std::string &html,
                              const std::vector<std::string> &names) {
@@ -206,19 +207,21 @@ static bool drawOutput(WINDOW *window, int &row, const Block &output) {
   return true;
 }
 
-// a heading, bullet or other block of text, with its marker. Headings are
-// bold.
+// a paragraph, bullet or other block of text, with its marker. Headings and
+// the terms of a definition list are bold, and definitions are indented.
 static bool drawBlock(WINDOW *window, int &row, const Block &block) {
-  const bool bold = block.name.starts_with('h');
+  const bool bold = block.name.starts_with('h') || block.name == "dt";
   const attr_t style = (bold ? A_BOLD : A_NORMAL) | colorOf(block.openingTag);
-  const int indent = block.marker.empty() ? 0 : textWidth(block.marker) + 1;
+  const int indent = block.name == "dd"      ? 4
+                     : block.marker.empty() ? 0
+                                            : textWidth(block.marker) + 1;
   wattrset(window, style);
   mvwaddstr(window, row, 0, block.marker.c_str());
   return drawText(window, row, indent, block.lines.front(), style);
 }
 
 static bool isListItem(const Block &block) {
-  return block.name == "li";
+  return block.name == "li" || block.name == "dt" || block.name == "dd";
 }
 
 // the blocks from the top of the window down, with a blank row between them
