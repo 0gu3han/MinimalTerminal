@@ -104,11 +104,47 @@ void Presentation::save() {
   load();
 }
 
+// C++ on the slides leaves out the includes, using namespace std and main(),
+// so code without an #include gets them here, out of sight
+static std::string asProgram(const std::string &code) {
+  if (code.contains("#include"))
+    return code;
+  std::string program;
+  for (const char *header :
+       {"algorithm", "array", "cmath", "deque", "iomanip", "iostream", "list",
+        "map", "numeric", "queue", "set", "stack", "string", "tuple",
+        "unordered_map", "unordered_set", "utility", "vector"})
+    program += "#include <" + std::string(header) + ">\n";
+  program += "using namespace std;\n";
+  if (code.contains("int main"))
+    return program + code;
+
+  // a top-level line like "bool isEven(int num)", but not "for (...)" or a
+  // comment, starts a function, which stays above main()
+  std::string statements;
+  int depth = 0;
+  bool inFunction = false;
+  for (size_t start = 0, end;
+       (end = code.find('\n', start)) != std::string::npos; start = end + 1) {
+    const std::string line = code.substr(start, end - start);
+    const std::string word = line.substr(0, line.find_first_of(" ("));
+    if (depth == 0 && line.ends_with(')') && !line.starts_with("//") &&
+        !std::string(" if else for while switch ").contains(" " + word + " "))
+      inFunction = true;
+    (inFunction ? program : statements) += line + "\n";
+    depth += std::ranges::count(line, '{') - std::ranges::count(line, '}');
+    if (depth == 0 && line.contains('}'))
+      inFunction = false;
+  }
+  return program + "int main()\n{\n" + statements + "}\n";
+}
+
 // Run the code and return what it printed. The code goes in a file in /tmp
 // first, and each program gets 5 seconds of CPU time so an endless loop stops.
 static std::string run(const std::string &code, const std::string &language) {
   const bool python = language == "python";
-  std::ofstream(python ? "/tmp/dynodeck.py" : "/tmp/dynodeck.cpp") << code;
+  std::ofstream(python ? "/tmp/dynodeck.py" : "/tmp/dynodeck.cpp")
+      << (python ? code : asProgram(code));
   const std::string program = python ? "python3 /tmp/dynodeck.py"
                                      : "c++ -std=c++23 /tmp/dynodeck.cpp -o "
                                        "/tmp/dynodeck && /tmp/dynodeck";
