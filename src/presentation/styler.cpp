@@ -73,9 +73,11 @@ attr_t colorOf(const std::string &openingTag) {
 attr_t attributeOf(const std::string &name) {
   if (name == "b" || name == "strong")
     return A_BOLD;
-  if (name == "i" || name == "em")
+  if (name == "i" || name == "em" || name == "var" || name == "dfn")
     return A_ITALIC;
   if (name == "u")
     return A_UNDERLINE;
+  if (name == "small")
+    return A_DIM;
   return A_NORMAL;
 }
