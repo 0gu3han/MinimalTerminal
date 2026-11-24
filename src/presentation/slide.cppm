@@ -39,7 +39,8 @@ struct Block {
   std::string name;
   /// The opening tag, for its color and the code's language
   std::string openingTag{};
-  /// The lines of code or output, or the one line of HTML of anything else
+  /// The lines of code, output or table rows, or the one line of HTML of
+  /// anything else
   std::vector<std::string> lines{};
   /// What goes in front of a list item, like • or 1.
   std::string marker{};

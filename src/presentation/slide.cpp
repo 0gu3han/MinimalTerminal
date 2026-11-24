@@ -20,7 +20,7 @@ const int columnGap = 4;
 // looked inside.
 static const std::vector<std::string> blockNames = {
     "h1", "h2", "h3", "h4", "p", "li", "dt", "dd", "figcaption",
-    "ol", "pre", "output", "section"};
+    "ol", "table", "pre", "output", "section"};
 
 std::vector<Element> findAll(const std::string &html,
                              const std::vector<std::string> &names) {
@@ -207,6 +207,44 @@ static bool drawOutput(WINDOW *window, int &row, const Block &output) {
   return true;
 }
 
+// how many table columns a cell spans, from colspan="2"
+static int spanOf(const std::string &openingTag) {
+  const size_t span = openingTag.find("colspan=\"");
+  return span == std::string::npos ? 1 : std::stoi(openingTag.substr(span + 9));
+}
+
+// a table with its columns lined up and its header cells bold
+static bool drawTable(WINDOW *window, int &row, const Block &table) {
+  // the widest cell in each column, not counting cells that span more than one
+  std::vector<int> widths;
+  for (const std::string &line : table.lines) {
+    size_t column = 0;
+    for (const Element &cell : findAll(line, {"th", "td"})) {
+      const int span = spanOf(cell.openingTag);
+      widths.resize(std::max(widths.size(), column + span));
+      if (span == 1)
+        widths[column] = std::max(widths[column], textWidth(cell.content));
+      column += span;
+    }
+  }
+
+  for (const std::string &line : table.lines) {
+    if (!startRow(window, row, 0))
+      return false;
+    int x = 0;
+    size_t column = 0;
+    for (const Element &cell : findAll(line, {"th", "td"})) {
+      int cellRow = row;
+      drawText(window, cellRow, x, cell.content,
+               cell.name == "th" ? A_BOLD : A_NORMAL);
+      for (int span = spanOf(cell.openingTag); span > 0; --span)
+        x += widths[column++] + 2;
+    }
+    ++row;
+  }
+  return true;
+}
+
 // a paragraph, bullet or other block of text, with its marker. Headings and
 // the terms of a definition list are bold, and definitions are indented.
 static bool drawBlock(WINDOW *window, int &row, const Block &block) {
@@ -234,6 +272,7 @@ static void drawBlocks(const Window &window, const std::vector<Block> &blocks) {
       ++row;
     const bool fits = block.name == "pre"      ? drawCode(window.get(), row, block)
                       : block.name == "output" ? drawOutput(window.get(), row, block)
+                      : block.name == "table"  ? drawTable(window.get(), row, block)
                                                : drawBlock(window.get(), row, block);
     if (!fits)
       return;
@@ -291,6 +330,11 @@ void Slide::addBlock(const Element &element, size_t sourceStart,
   } else if (element.name == "output") {
     isOutput = true;
     blocks.push_back({"output", "", outputLines(element.content)});
+  } else if (element.name == "table") {
+    Block table{"table"};
+    for (const Element &row : findAll(element.content, {"tr"}))
+      table.lines.push_back(row.content);
+    blocks.push_back(table);
   } else if (element.name == "ol") {
     // numbered items, like 1. and 2.
     int number = 0;
