@@ -141,13 +141,17 @@ static std::string asProgram(const std::string &code) {
 
 // Run the code and return what it printed. The code goes in a file in /tmp
 // first, and each program gets 5 seconds of CPU time so an endless loop stops.
+// C++ that doesn't compile shows only its first error, since the rest would
+// point into the includes and main() that asProgram() hides.
 static std::string run(const std::string &code, const std::string &language) {
   const bool python = language == "python";
   std::ofstream(python ? "/tmp/dynodeck.py" : "/tmp/dynodeck.cpp")
       << (python ? code : asProgram(code));
-  const std::string program = python ? "python3 /tmp/dynodeck.py"
-                                     : "c++ -std=c++23 /tmp/dynodeck.cpp -o "
-                                       "/tmp/dynodeck && /tmp/dynodeck";
+  const std::string program =
+      python ? "python3 /tmp/dynodeck.py"
+             : "if c++ -std=c++23 /tmp/dynodeck.cpp -o /tmp/dynodeck "
+               "2> /tmp/dynodeck.txt; then /tmp/dynodeck; "
+               "else grep -m1 -o 'error: .*' /tmp/dynodeck.txt; fi";
   // no input, so it never waits on the keyboard, and errors and messages from
   // the shell are read too instead of going over the slides
   FILE *pipe = popen(("exec 2>&1 < /dev/null; (ulimit -t 5; " + program +
